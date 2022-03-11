@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import DepositPage from './pages/DepositPage';
 import { PoolDetailsPage } from './pages/pools/DetailsPage';
 import SwapPage from './pages/SwapPage';
 import { AccountPage } from './pages/AccountPage';
@@ -31,6 +30,7 @@ import { AirdropPage } from '~pages/AirdropPage';
 import PopUpSwiper from '~components/layout/PopUp';
 import SwapGuide from '~components/layout/SwapGuide';
 import { isMobile } from '~utils/device';
+import CrossSwapPage from '~pages/CrossSwapPage';
 
 Modal.defaultStyles = {
   overlay: {
@@ -92,6 +92,7 @@ function App() {
           <Route path="/xref" component={AutoHeight(XrefPage)} />
           <Route path="/risks" component={AutoHeight(RiskPage)} />
           <Route path="/" component={AutoHeight(SwapPage)} />
+          <Route path="/crossswap" component={AutoHeight(CrossSwapPage)} />
         </Switch>
         <Footer />
         <SwapGuide></SwapGuide>
