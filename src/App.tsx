@@ -167,10 +167,10 @@ function App() {
             <Route path="/airdrop" component={AutoHeight(AirdropPage)} />
             <Route path="/farms" component={AutoHeight(FarmsPage)} />
             <Route path="/stableswap" component={AutoHeight(StableSwapPage)} />
+            <Route path="/crossswap" component={AutoHeight(CrossSwapPage)} />
             <Route path="/xref" component={AutoHeight(XrefPage)} />
             <Route path="/risks" component={AutoHeight(RiskPage)} />
             <Route path="/" component={AutoHeight(SwapPage)} />
-              <Route path="/crossswap" component={AutoHeight(CrossSwapPage)} />
           </Switch>
           <Footer />
           <SwapGuide></SwapGuide>
