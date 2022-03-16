@@ -91,6 +91,8 @@ module.exports = {
         darkGreenColor: '#009A2B',
         riskTextColor: '#BEBEBE',
         senderHot: '#00FFD1',
+        smBtnBorder: '#373F45',
+        charBtnBg: '#4A5862',
       },
       fontFamily: {
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],

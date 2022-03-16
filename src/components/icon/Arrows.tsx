@@ -357,10 +357,12 @@ export function SwapExchange({ onChange }: { onChange: (e?: any) => void }) {
   );
 }
 
-export function StableSwapExchangePC({
+export function RateExchanger({
   onChange,
+  rounded,
 }: {
   onChange: (e?: any) => void;
+  rounded?: string;
 }) {
   const [hover, setHover] = useState<boolean>(false);
   const rightRow = useRef(null);
@@ -387,7 +389,79 @@ export function StableSwapExchangePC({
 
   return (
     <div
-      className="relative flex items-center justify-center -mt-6 mb-4 w-11 h-11 border border-white border-opacity-40 rounded-full cursor-pointer bg-dark"
+      className={`relative flex items-center justify-center w-7 h-7 border border-smBtnBorder rounded-lg cursor-pointer bg-dark`}
+      style={{
+        transform: 'scale(0.9)',
+      }}
+      onClick={() => {
+        onChange();
+        mobileDevice && runSwapAnimation();
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <div
+        className="flex flex-col items-center"
+        style={{
+          transform: 'scale(0.8)',
+        }}
+      >
+        <span
+          className={`transition-transform transform ${
+            hover ? 'lg:translate-x-0.5 ' : ''
+          }`}
+          ref={rightRow}
+        >
+          <SwapArrowRight light={mobileDevice ? mobileAnimation : hover} />
+        </span>
+        <span
+          className={`transition-transform transform ${
+            hover ? 'lg:-translate-x-0.5' : ''
+          }`}
+          ref={leftRow}
+        >
+          <SwapArrowLeft light={mobileDevice ? mobileAnimation : hover} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function StableSwapExchangePC({
+  onChange,
+  rounded,
+}: {
+  onChange: (e?: any) => void;
+  rounded?: string;
+}) {
+  const [hover, setHover] = useState<boolean>(false);
+  const rightRow = useRef(null);
+  const leftRow = useRef(null);
+
+  const mobileDevice = isMobile();
+
+  const [mobileAnimation, setMobileAnimation] = useState<boolean>(false);
+
+  const runSwapAnimation = function () {
+    rightRow.current.style.animation = 'arrowUp 0.5s 0s ease-out 1';
+    leftRow.current.style.animation = 'arrowDown 0.5s 0s ease-out 1';
+    setMobileAnimation(true);
+
+    rightRow.current.addEventListener('animationend', function () {
+      rightRow.current.style.animation = '';
+      setMobileAnimation(false);
+    });
+    leftRow.current.addEventListener('animationend', function () {
+      leftRow.current.style.animation = '';
+      setMobileAnimation(false);
+    });
+  };
+
+  return (
+    <div
+      className={`relative flex items-center justify-center -mt-6 mb-4 w-11 h-11 border border-white border-opacity-40 ${
+        rounded ? rounded : 'rounded-full'
+      } cursor-pointer bg-dark`}
       onClick={() => {
         onChange();
         mobileDevice && runSwapAnimation();

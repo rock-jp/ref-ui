@@ -57,6 +57,7 @@ import {
   signedInStateReducer,
   removeSenderLoginRes,
 } from './utils/sender-wallet';
+import { PoolDetail } from '~components/newFarm/PoolDetail';
 
 Modal.defaultStyles = {
   overlay: {
@@ -178,6 +179,7 @@ function App() {
             <Route path="/stableswap" component={AutoHeight(StableSwapPage)} />
             <Route path="/xref" component={AutoHeight(XrefPage)} />
             <Route path="/risks" component={AutoHeight(RiskPage)} />
+            <Route path="/new-pool-detail" component={AutoHeight(PoolDetail)} />
             <Route path="/" component={AutoHeight(SwapPage)} />
           </Switch>
           <Footer />
