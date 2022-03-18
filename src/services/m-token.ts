@@ -205,6 +205,7 @@ export const withdrawAllReward = async (
   checkedList: Record<string, any>,
   unregister = false
 ) => {
+  debugger;
   const transactions: Transaction[] = [];
   const token_id_list = Object.keys(checkedList);
   const ftBalancePromiseList: any[] = [];

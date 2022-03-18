@@ -126,6 +126,8 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         },
         TOTAL_PLATFORM_FEE_REVENUE:
           process.env.TOTAL_PLATFORM_FEE_REVENUE || '242,633.0475',
+        REF_FARM_V2_CONTRACT_ID:
+          process.env.REF_FARM_V2_CONTRACT_ID || 'v2farm100.ref-dev.testnet',
       };
     default:
       return {

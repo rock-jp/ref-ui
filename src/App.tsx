@@ -22,6 +22,7 @@ import { MorePoolsPage } from '~pages/pools/MorePoolsPage';
 import StableSwapPage from './pages/stable/StableSwapPage';
 import XrefPage from './pages/xref/XrefPage';
 import RiskPage from './pages/RiskPage';
+import FarmsPageV2 from './pages/farms/FarmsPageV2';
 import {
   BgShapeLeftTop,
   BgShapeCenter,
@@ -178,6 +179,7 @@ function App() {
             <Route path="/stableswap" component={AutoHeight(StableSwapPage)} />
             <Route path="/xref" component={AutoHeight(XrefPage)} />
             <Route path="/risks" component={AutoHeight(RiskPage)} />
+            <Route path="/farmsv2" component={AutoHeight(FarmsPageV2)} />
             <Route path="/" component={AutoHeight(SwapPage)} />
           </Switch>
           <Footer />

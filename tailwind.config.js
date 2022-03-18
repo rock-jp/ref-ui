@@ -91,6 +91,10 @@ module.exports = {
         darkGreenColor: '#009A2B',
         riskTextColor: '#BEBEBE',
         senderHot: '#00FFD1',
+        farmV2TabColor:'#4A5862',
+        farmV2SmallTabCOlor:'#1A2329',
+        farmV2BoxBg:'#141D24',
+        farmV2WithDrawBg:'#151E29'
       },
       fontFamily: {
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],

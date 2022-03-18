@@ -71,6 +71,24 @@ export interface FarmInfo extends Farm {
   seedAmount: string;
 }
 
+export interface FarmKind extends Farm {
+  pool: PoolRPCView;
+  rewardToken: TokenMetadata;
+  rewardsPerWeekAmount: string;
+  seedTotalStakedWorth: string;
+  seedTotalStakedAmount: string;
+  apr: string;
+  userStakedAmount: string;
+  userUnclaimedRewardAmount: string;
+}
+
+export interface extendType {
+  show?: boolean;
+  totalApr?: number;
+  default?: string;
+  multiple?: string;
+}
+
 export const getSeeds = async ({
   page = 1,
   perPage = DEFAULT_PAGE_LIMIT,
@@ -117,6 +135,7 @@ export const getFarms = async ({
   tokenPriceList: any;
   seeds: Record<string, string>;
 }): Promise<FarmInfo[]> => {
+  // todo 0
   const index = (page - 1) * perPage;
   let farms: Farm[] = await refFarmViewFunction({
     methodName: 'list_farms',
@@ -333,7 +352,7 @@ export const getFarm = async (id: number): Promise<Farm> => {
   });
 };
 
-export const getRewards = async ({
+export const list_user_rewards = async ({
   accountId = getCurrentWallet().wallet.getAccountId(),
 }): Promise<any> => {
   return refFarmViewFunction({
@@ -442,6 +461,35 @@ export const claimAndWithDrawReward = async (
     });
   }
   return executeFarmMultipleTransactions(transactions);
+};
+export async function getFarmList(page = 1, perPage = DEFAULT_PAGE_LIMIT) {
+  // todo
+  const index = (page - 1) * perPage;
+  let farms: Farm[] = await refFarmViewFunction({
+    methodName: 'list_farms',
+    args: { from_index: index, limit: perPage },
+  });
+  // filter  unexpected farm data
+  const blackFarmList = new Set(config.blackList || []);
+  farms = farms.filter((item) => {
+    const { farm_id } = item;
+    const arr = farm_id.split('@');
+    if (!blackFarmList.has(arr[1])) {
+      return true;
+    }
+  });
+  return farms;
+}
+export const list_user_seed_powers = async ({
+  // todo 替换合约的时候修改接口名字
+  accountId = getCurrentWallet().wallet.getAccountId(),
+}): Promise<Record<string, string>> => {
+  const stakedList = await refFarmViewFunction({
+    methodName: 'list_user_seeds', // list_user_seed_powers
+    args: { account_id: accountId },
+  });
+
+  return stakedList;
 };
 export const classificationOfCoins = {
   stablecoin: ['USDT', 'USDC', 'DAI', 'nUSDO', 'cUSD'],

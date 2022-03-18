@@ -357,5 +357,8 @@ const uk_UA = {
   mulitple: 'Декілька',
   default: 'За замовчуванням',
   vi_go_live: 'Доступна В&apos;єтнамська мова!',
+  multi_Rewards: 'Multi-Rewards',
+  rewards: 'Rewards',
+  claimed_Rewards: 'Claimed Rewards',
 };
 export default uk_UA;

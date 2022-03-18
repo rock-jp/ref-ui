@@ -384,5 +384,8 @@ const vi = {
   Type: 'Kiểu',
   click_to_view: 'Nhấn để xem',
   transaction_failed: 'Giao dịch thất bại',
+  multi_Rewards: 'Multi-Rewards',
+  rewards: 'Rewards',
+  claimed_Rewards: 'Claimed Rewards',
 };
 export default vi;
