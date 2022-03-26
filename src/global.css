@@ -189,6 +189,21 @@ input[type='number'] {
   transform: translate(29.29%, -100%) rotate(45deg);
   text-indent: 0;
 }
+.status-bar-left {
+  font-size: 14px;
+  line-height: 28px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0 2em;
+  -webkit-transform-origin: right bottom;
+  -moz-transform-origin: right bottom;
+  transform-origin: right bottom;
+  -webkit-transform: translate(-29.29%, -100%) rotate(-45deg);
+  -moz-transform: translate(-29.29%, -100%) rotate(-45deg);
+  transform: translate(-29.29%, -100%) rotate(-45deg);
+  text-indent: 0;
+}
 
 .ended {
   color: #fff;
@@ -328,6 +343,9 @@ input[type='range']::-webkit-slider-runnable-track {
 }
 .farmEnded img {
   filter: grayscale(100%);
+}
+.farmEnded .character {
+  background-color: #73818b;
 }
 
 .swap-wrap {

@@ -32,7 +32,7 @@ import {
   FarmInfo,
   getFarmInfo,
   getStakedListByAccountId,
-  getRewards,
+  list_user_rewards,
   getSeeds,
   DEFAULT_PAGE_LIMIT,
   claimRewardBySeed,
@@ -192,7 +192,7 @@ export function FarmsPage() {
     if (isSignedIn) {
       Params = [
         getStakedListByAccountId({}),
-        getRewards({}),
+        list_user_rewards({}),
         getTokenPriceList(),
         getSeeds({}),
       ];

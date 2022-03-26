@@ -363,5 +363,9 @@ const zh_CN = {
   click_to_view: '点击查看详情',
   transaction_failed: '交易失败',
   wallet_vi: ' ',
+  multi_Rewards: '多奖励',
+  rewards_week: '奖励/每周',
+  rewards: 'Rewards',
+  claimed_Rewards: '已经领取的奖励',
 };
 export default zh_CN;

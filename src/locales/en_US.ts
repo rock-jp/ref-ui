@@ -333,9 +333,9 @@ const en_US = {
   check_the_transaction_settings: 'Check the transaction settings',
   filter_by: 'Filter by',
   allOption: 'All',
-  stablecoin: 'Stablecoin',
-  near_ecosystem: 'Near ecosystem',
-  bridged_tokens: 'Bridged tokens',
+  stablecoin: 'Stable',
+  near_ecosystem: 'NEAR',
+  bridged_tokens: 'Bridged',
   gaming: 'Gaming',
   nft: 'NFT',
   bridge: 'Bridge to/from',
@@ -377,5 +377,9 @@ const en_US = {
   click_to_view: 'Click to view',
   transaction_failed: 'Transaction failed',
   wallet_vi: ' ',
+  multi_Rewards: 'Multi-Rewards',
+  rewards_week: 'Rewards/week',
+  rewards: 'Rewards',
+  claimed_Rewards: 'Claimed Rewards',
 };
 export default en_US;

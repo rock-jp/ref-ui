@@ -93,6 +93,10 @@ module.exports = {
         senderHot: '#00FFD1',
         smBtnBorder: '#373F45',
         charBtnBg: '#4A5862',
+        farmV2TabColor: '#4A5862',
+        farmV2SmallTabCOlor: '#1A2329',
+        farmV2BoxBg: '#141D24',
+        farmV2WithDrawBg: '#151E29',
       },
       fontFamily: {
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],
