@@ -20,7 +20,7 @@ import getConfig from '../../services/config';
 import { BigNumber } from 'bignumber.js';
 import moment from 'moment';
 import { useHistory } from 'react-router';
-import InputAmount from '~components/forms/InputAmount';
+import InputAmount, { NewFarmInputAmount } from '~components/forms/InputAmount';
 import {
   toPrecision,
   toReadableNumber,
@@ -55,9 +55,11 @@ import { useWalletTokenBalances } from '../../state/token';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 import { isMobile } from '~utils/device';
 import { Card } from '~components/card/Card';
-import { SmallWallet } from '../../components/icon/SmallWallet';
 import { WarnTriangle } from '~components/icon/SwapRefresh';
 import { ActionModel } from '~pages/AccountPage';
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import { PoolDetail } from './PoolDetail';
+import { divide, scientificNotationToString } from '../../utils/numbers';
 import {
   useMonthTVL,
   useMonthVolume,
@@ -71,6 +73,37 @@ import {
 } from '~state/pool';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
 const ONLY_ZEROS = /^0*\.?0*$/;
+
+function PoolDetailMag({
+  showReserves,
+  setShowReserves,
+}: {
+  showReserves: boolean;
+  setShowReserves: (e?: any) => void;
+}) {
+  return (
+    <span
+      className={`px-5 rounded-t-xl text-sm text-farmText mx-auto flex items-center justify-center cursor-pointer bg-cardBg pt-3 relative bottom-10 ${
+        showReserves ? 'pb-5' : 'pb-1.5'
+      }`}
+      style={{
+        borderTop: '1px solid #415462',
+        width: '175px',
+      }}
+      onClick={() => {
+        setShowReserves(!showReserves);
+      }}
+    >
+      <span>
+        <FormattedMessage id="pool_detail" defaultMessage="Pool Detail" />
+      </span>
+      <span className="ml-2">
+        {showReserves ? <FaAngleUp /> : <FaAngleDown />}
+      </span>
+    </span>
+  );
+}
+
 export default function PoolTab(props: any) {
   const { pool, shares, stakeList } = usePool('5'); // todo
   const { detailData, tokenPriceList, hidden } = props;
@@ -81,11 +114,14 @@ export default function PoolTab(props: any) {
   const switchTab = (tab: string) => {
     setActiveTab(tab);
   };
+
+  const [showReserves, setShowReserves] = useState(false);
+
   if (!(tokens && tokens.length > 0 && pool)) return null;
   return (
     <>
       <div
-        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-7 py-3 ${
+        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 pt-3 pb-16 ${
           hidden ? 'hidden' : ''
         }`}
       >
@@ -98,7 +134,7 @@ export default function PoolTab(props: any) {
               activeTab == 'add' ? 'text-white' : 'text-primaryText'
             }`}
           >
-            <FormattedMessage id="add_liquidity"></FormattedMessage>
+            <FormattedMessage id="add_liquidity" />
             <div
               className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
                 activeTab == 'add' ? 'bg-greenColor' : ''
@@ -128,6 +164,12 @@ export default function PoolTab(props: any) {
           <AddLiquidity pool={pool} tokens={tokens}></AddLiquidity>
         </div>
       </div>
+      <PoolDetailMag
+        showReserves={showReserves}
+        setShowReserves={setShowReserves}
+      />
+
+      <PoolDetail pool={pool} showDetail={showReserves} />
     </>
   );
 }
@@ -307,11 +349,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         setModal(Object.assign({}, modalData));
       });
       setModal(modalData);
-      // throw new Error(
-      //   `${intl.formatMessage({ id: 'you_do_not_have_enough' })} ${toRealSymbol(
-      //     tokens[1].symbol
-      //   )}`
-      // );
       return;
     }
 
@@ -320,11 +357,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       setMessageId('add_liquidity');
       setDefaultMessage('Add Liquidity');
       return;
-      // throw new Error(
-      //   `${toRealSymbol(tokens[0].symbol)} ${intl.formatMessage({
-      //     id: 'amount_must_be_greater_than_0',
-      //   })} `
-      // );
     }
 
     if (ONLY_ZEROS.test(secondAmount)) {
@@ -332,11 +364,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       setMessageId('add_liquidity');
       setDefaultMessage('Add Liquidity');
       return;
-      // throw new Error(
-      //   `${toRealSymbol(tokens[1].symbol)} ${intl.formatMessage({
-      //     id: 'amount_must_be_greater_than_0',
-      //   })} `
-      // );
     }
 
     if (!tokens[0]) {
@@ -370,8 +397,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
     });
   }
 
-  const cardWidth = isMobile() ? '95vw' : '40vw';
-
   const ButtonRender = () => {
     if (!isSignedIn) {
       return <ConnectToNearBtn />;
@@ -386,9 +411,11 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
     return (
       <SolidButton
         disabled={!canSubmit || canDeposit}
-        className="focus:outline-none px-4 w-full"
+        className="focus:outline-none  w-full text-lg"
         onClick={handleClick}
         loading={buttonLoading}
+        padding={'p-4'}
+        rounded={'rounded-lg'}
       >
         <div className="flex items-center justify-center w-full m-auto">
           <div>
@@ -406,30 +433,50 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       </SolidButton>
     );
   };
+
   const shareDisplay = () => {
     let result = '';
+    let percentShare = '';
+    let displayPercentShare = '';
     if (preShare && new BigNumber('0').isLessThan(preShare)) {
       const myShareBig = new BigNumber(preShare);
       if (myShareBig.isLessThan('0.001')) {
         result = '<0.001';
       } else {
-        result = `≈ ${myShareBig.toFixed(3)}`;
+        result = `${myShareBig.toFixed(3)}`;
       }
     } else {
       result = '-';
     }
-    return result;
+
+    if (result !== '-') {
+      percentShare = `${percent(
+        preShare,
+        toReadableNumber(24, pool.shareSupply)
+      )}`;
+
+      if (Number(percentShare) > 0 && Number(percentShare) < 0.01) {
+        displayPercentShare = '< 0.01%';
+      } else {
+        displayPercentShare = `${toPrecision(percentShare, 2)}%`;
+      }
+    }
+
+    return (
+      <span className="flex items-center">
+        <span>{`${result}`}</span>
+        <span className="text-xs ml-1 text-farmText">{`${displayPercentShare}`}</span>
+      </span>
+    );
   };
   return (
     <div className="text-white outline-none">
-      <div className="mt-8 md:hidden xs:hidden">
-        <div className="flex justify-end items-center text-xs text-right mb-1 text-gray-400">
-          <span className="mr-2 text-primaryText">
-            <SmallWallet />
-          </span>
+      <div className="mt-8">
+        <div className="flex justify-end items-center text-sm text-right mb-1.5 text-farmText">
           <FormattedMessage id="balance" defaultMessage="Balance" />
-          :&nbsp;
+          {':'}
           <span
+            className="ml-1"
             title={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
           >
             {toPrecision(
@@ -440,28 +487,26 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           </span>
         </div>
         <div className="flex items-center ">
-          <div className="flex items-center mr-4 w-1/3">
-            <Icon icon={tokens[0].icon} className="h-9 w-9 mr-2" />
-            <div className="text-white text-base" title={tokens[0].id}>
-              {toRealSymbol(tokens[0].symbol)}
-            </div>
-          </div>
-          <InputAmount
+          <NewFarmInputAmount
             className="w-full border border-transparent rounded"
             max={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
             onChangeAmount={changeFirstTokenAmount}
             value={firstTokenAmount}
+            tokenSymbol={toRealSymbol(tokens[0].symbol)}
           />
         </div>
       </div>
-      <div className="my-8 md:hidden xs:hidden">
-        <div className="flex justify-end items-center text-xs text-right mb-1 text-gray-400">
-          <span className="mr-2 text-primaryText">
-            <SmallWallet />
-          </span>
+
+      <span className="text-3xl text-primaryText mt-4 pl-8 font-thin block relative top-1">
+        +
+      </span>
+
+      <div className="mb-8">
+        <div className="flex justify-end items-center text-sm text-right mb-1.5 text-farmText">
           <FormattedMessage id="balance" defaultMessage="Balance" />
-          :&nbsp;
+          {':'}
           <span
+            className="ml-1"
             title={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
           >
             {toPrecision(
@@ -472,17 +517,12 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           </span>
         </div>
         <div className="flex items-center">
-          <div className="flex items-center mr-4 w-1/3">
-            <Icon icon={tokens[1].icon} className="h-9 w-9 mr-2" />
-            <div className="text-white text-base" title={tokens[1].id}>
-              {toRealSymbol(tokens[1].symbol)}
-            </div>
-          </div>
-          <InputAmount
+          <NewFarmInputAmount
             className="w-full border border-transparent rounded"
             max={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
             onChangeAmount={changeSecondTokenAmount}
             value={secondTokenAmount}
+            tokenSymbol={toRealSymbol(tokens[1].symbol)}
           />
         </div>
       </div>
@@ -507,28 +547,15 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       ) : null}
       <div className="flex justify-between text-primaryText text-sm my-6">
         <label>
-          <FormattedMessage id="my_shares"></FormattedMessage>
+          <FormattedMessage id="lp_tokens" defaultMessage={'LP tokens'} />
         </label>
-        <span className="text-white text-sm">{shareDisplay()}</span>
+        <span className="text-white text-sm">
+          {canDeposit ? '-' : shareDisplay()}
+        </span>
       </div>
       <div className="">
         <ButtonRender />
       </div>
     </div>
-  );
-}
-function Icon(props: { icon?: string; className?: string; style?: any }) {
-  const { icon, className, style } = props;
-  return icon ? (
-    <img
-      className={`block ${className} rounded-full border border-gradientFromHover border-solid`}
-      src={icon}
-      style={style}
-    />
-  ) : (
-    <div
-      className={`rounded-full ${className} border border-gradientFromHover  border-solid`}
-      style={style}
-    />
   );
 }

@@ -519,10 +519,14 @@ export const GetExchangeRate = ({
 };
 
 // get pool info from parent component
-export function PoolDetail() {
-  const id = window.location.pathname.split('/').at(-1);
-
-  const { pool } = usePool(id || 317);
+export function PoolDetail({
+  pool,
+  showDetail,
+}: {
+  pool: Pool;
+  showDetail?: boolean;
+}) {
+  // const { pool } = usePool(id);
 
   const [tokens, setTokens] = useState<{
     [poolId: string]: TokenMetadata;
@@ -548,7 +552,7 @@ export function PoolDetail() {
     ftGetTokensMetadata(pool?.tokenIds).then(setTokens);
   }, [pool]);
 
-  if (!pool || !tokens) return <Loading />;
+  if (!tokens) return <Loading />;
 
   const Header = () => {
     return (
@@ -644,7 +648,9 @@ export function PoolDetail() {
     <Card
       padding="px-6 pt-8 pb-6"
       width="w-580px"
-      className="mx-auto flex flex-col relative"
+      className={`mx-auto flex flex-col relative bottom-10 ${
+        showDetail ? 'block' : 'hidden'
+      }`}
     >
       <Header />
 

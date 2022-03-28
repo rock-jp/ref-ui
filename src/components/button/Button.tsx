@@ -193,16 +193,19 @@ export function SolidButton(
     padding?: string;
     className?: string;
     loading?: boolean;
+    rounded?: string;
   }
 ) {
-  const { disabled, padding, className, onClick, loading } = props;
+  const { disabled, padding, className, onClick, loading, rounded } = props;
   return (
     <button
       onClick={onClick}
       className={`${disabled ? 'cursor-not-allowed opacity-40' : ''}  ${
         loading ? 'opacity-40' : ''
       }
-        text-white rounded  bg-gradient-to-b from-gradientFrom to-gradientTo hover:from-gradientFromHover to:from-gradientToHover
+        text-white ${
+          rounded ? rounded : 'rounded'
+        }  bg-gradient-to-b from-gradientFrom to-gradientTo hover:from-gradientFromHover to:from-gradientToHover
          ${padding ? padding : 'py-2'}
         ${className ? className : ''}
       `}
