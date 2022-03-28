@@ -347,3 +347,34 @@ export function BorderButtonMobile(
     </button>
   );
 }
+export function OprationButton(
+  props: HTMLAttributes<HTMLButtonElement> & {
+    disabled?: boolean;
+    padding?: string;
+    className?: string;
+    color?: string;
+    btnClassName?: string;
+    loading?: boolean;
+  }
+) {
+  const { loading, disabled, className, color, btnClassName, onClick } = props;
+  return (
+    <div
+      className={`${className ? className : ''} ${loading ? 'opacity-40' : ''}`}
+      style={{
+        borderRadius: '8px',
+        color: color || '',
+      }}
+    >
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`flex items-center justify-center  w-full h-full ${
+          btnClassName ? btnClassName : ''
+        }`}
+      >
+        {props.children}
+      </button>
+    </div>
+  );
+}
