@@ -25,6 +25,8 @@ export const STABLE_TOKEN_INDEX = config.STABLE_TOKEN_INDEX;
 
 export const REF_FARM_CONTRACT_ID = config.REF_FARM_CONTRACT_ID;
 
+export const REF_FARM_V2_CONTRACT_ID = config.REF_FARM_V2_CONTRACT_ID;
+
 export const REF_AIRDRAOP_CONTRACT_ID = config.REF_AIRDROP_CONTRACT_ID;
 
 export const REF_TOKEN_ID = config.REF_TOKEN_ID;
@@ -209,4 +211,31 @@ export const refContractViewFunction = ({
   args,
 }: RefContractViewFunctionOptions) => {
   return wallet.account().viewFunction(XREF_TOKEN_ID, methodName, args);
+};
+
+export const refFarmV2ViewFunction = ({
+  methodName,
+  args,
+}: RefFiViewFunctionOptions) => {
+  return wallet
+    .account()
+    .viewFunction(REF_FARM_V2_CONTRACT_ID, methodName, args);
+};
+export const refFarmV2FunctionCall = ({
+  methodName,
+  args,
+  gas,
+  amount,
+}: RefFiFunctionCallOptions) => {
+  const { wallet, wallet_type } = getCurrentWallet();
+
+  return wallet
+    .account()
+    .functionCall(
+      REF_FARM_V2_CONTRACT_ID,
+      methodName,
+      args,
+      getGas(gas),
+      getAmount(amount)
+    );
 };

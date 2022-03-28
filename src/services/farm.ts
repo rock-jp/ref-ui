@@ -4,6 +4,9 @@ import {
   wallet,
   Transaction,
   executeFarmMultipleTransactions,
+  refFarmV2ViewFunction,
+  refFarmV2FunctionCall,
+  near,
 } from './near';
 import {
   toPrecision,
@@ -88,7 +91,11 @@ export interface extendType {
   default?: string;
   multiple?: string;
 }
-
+export interface cdStrategy {
+  enable: boolean;
+  lock_sec: number;
+  power_reward_rate: number;
+}
 export const getSeeds = async ({
   page = 1,
   perPage = DEFAULT_PAGE_LIMIT,
@@ -135,7 +142,6 @@ export const getFarms = async ({
   tokenPriceList: any;
   seeds: Record<string, string>;
 }): Promise<FarmInfo[]> => {
-  // todo 0
   const index = (page - 1) * perPage;
   let farms: Farm[] = await refFarmViewFunction({
     methodName: 'list_farms',
@@ -462,10 +468,11 @@ export const claimAndWithDrawReward = async (
   }
   return executeFarmMultipleTransactions(transactions);
 };
-export async function getFarmList(page = 1, perPage = DEFAULT_PAGE_LIMIT) {
+// new interface start
+export async function farm_list_v2(page = 1, perPage = DEFAULT_PAGE_LIMIT) {
   // todo
   const index = (page - 1) * perPage;
-  let farms: Farm[] = await refFarmViewFunction({
+  let farms: Farm[] = await refFarmV2ViewFunction({
     methodName: 'list_farms',
     args: { from_index: index, limit: perPage },
   });
@@ -481,16 +488,146 @@ export async function getFarmList(page = 1, perPage = DEFAULT_PAGE_LIMIT) {
   return farms;
 }
 export const list_user_seed_powers = async ({
-  // todo 替换合约的时候修改接口名字
   accountId = getCurrentWallet().wallet.getAccountId(),
 }): Promise<Record<string, string>> => {
-  const stakedList = await refFarmViewFunction({
-    methodName: 'list_user_seeds', // list_user_seed_powers
+  const stakedList = await refFarmV2ViewFunction({
+    methodName: 'list_user_seed_powers',
     args: { account_id: accountId },
   });
 
   return stakedList;
 };
+export const list_user_seed_amounts = async ({
+  accountId = getCurrentWallet().wallet.getAccountId(),
+}): Promise<Record<string, string>> => {
+  const stakedList = await refFarmV2ViewFunction({
+    methodName: 'list_user_seed_amounts',
+    args: { account_id: accountId },
+  });
+
+  return stakedList;
+};
+export const list_user_rewards_v2 = async ({
+  accountId = getCurrentWallet().wallet.getAccountId(),
+}): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'list_rewards',
+    args: { account_id: accountId },
+  });
+};
+export const list_seeds_v2 = async ({
+  page = 1,
+  perPage = DEFAULT_PAGE_LIMIT,
+}: {
+  page?: number;
+  perPage?: number;
+}): Promise<Record<string, string>> => {
+  const index = (page - 1) * perPage;
+  const seedDatas = await refFarmV2ViewFunction({
+    methodName: 'list_seeds',
+    args: { from_index: index, limit: perPage },
+  });
+
+  return seedDatas;
+};
+export const get_seed_info = async (
+  seedId: string
+): Promise<Record<string, string>> => {
+  const seedDatas = await refFarmV2ViewFunction({
+    methodName: 'get_seed_info',
+    args: { seed_id: seedId },
+  });
+
+  return seedDatas;
+};
+export const get_seed_info_by_seedId = async ({
+  seedId = '',
+}: {
+  seedId: string;
+}): Promise<Record<string, string>> => {
+  const seedData = await refFarmV2ViewFunction({
+    methodName: 'get_seed_info',
+    args: { seed_id: seedId },
+  });
+
+  return seedData;
+};
+
+export const getUnclaimedReward_v2 = async (
+  farm_id: string,
+  accountId = getCurrentWallet().wallet.getAccountId()
+): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'get_unclaimed_reward',
+    args: { account_id: accountId, farm_id: farm_id },
+  });
+};
+export const claimRewardByFarm_v2 = async (farm_id: string): Promise<any> => {
+  return refFarmV2FunctionCall({
+    methodName: 'claim_reward_by_farm',
+    args: { farm_id: farm_id },
+  });
+};
+
+export const claimRewardBySeed_v2 = async (seed_id: string): Promise<any> => {
+  return refFarmV2FunctionCall({
+    methodName: 'claim_reward_by_seed',
+    args: { seed_id: seed_id },
+  });
+};
+export const list_user_seed_info = async (
+  accountId = getCurrentWallet().wallet.getAccountId()
+): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'list_user_seed_info',
+    args: { account_id: accountId, from_index: 0, limit: 100 },
+  });
+};
+export const get_cd_strategy = async (): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'get_cd_strategy',
+    args: {},
+  });
+};
+export const get_user_seed_info_by_seedId = async ({
+  accountId = getCurrentWallet().wallet.getAccountId(),
+  seedId = '',
+}): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'get_user_seed_info',
+    args: { account_id: accountId, seed_id: seedId },
+  });
+};
+export const list_farms_by_seed = async ({ seedId = '' }): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'list_farms_by_seed',
+    args: { seed_id: seedId },
+  });
+};
+export const list_user_cd_account = async (
+  accountId = getCurrentWallet().wallet.getAccountId()
+): Promise<any> => {
+  return refFarmV2ViewFunction({
+    methodName: 'list_user_cd_account',
+    args: { account_id: accountId, from_index: 0, limit: 100 },
+  });
+};
+export const getServerTime = async () => {
+  const result = await near.connection.provider
+    .block({
+      finality: 'final',
+    })
+    .catch(() => {
+      return {
+        header: {
+          timestamp: new Date().getTime() * 100000,
+        },
+      };
+    });
+  const timestamp = result?.header?.timestamp;
+  return timestamp;
+};
+// new interface end
 export const classificationOfCoins = {
   stablecoin: ['USDT', 'USDC', 'DAI', 'nUSDO', 'cUSD'],
   near_ecosystem: [

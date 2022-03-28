@@ -182,6 +182,10 @@ function App() {
             <Route path="/risks" component={AutoHeight(RiskPage)} />
             <Route path="/new-pool-detail" component={AutoHeight(PoolDetail)} />
             <Route path="/farmsv2" component={AutoHeight(FarmsPageV2)} />
+            <Route
+              path="/farmsv2/:seedId?"
+              component={AutoHeight(FarmsPageV2)}
+            />
             <Route path="/" component={AutoHeight(SwapPage)} />
           </Switch>
           <Footer />

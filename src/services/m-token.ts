@@ -6,6 +6,7 @@ import {
   executeFarmMultipleTransactions,
   REF_FI_CONTRACT_ID,
   REF_FARM_CONTRACT_ID,
+  REF_FARM_V2_CONTRACT_ID,
   wallet,
 } from '../services/near';
 import { ftGetStorageBalance, TokenMetadata } from '../services/ft-contract';
@@ -13,6 +14,7 @@ import { toNonDivisibleNumber } from '../utils/numbers';
 import {
   ACCOUNT_MIN_STORAGE_AMOUNT,
   currentStorageBalanceOfFarm,
+  currentStorageBalanceOfFarm_v2,
 } from '../services/account';
 import {
   MIN_DEPOSIT_PER_TOKEN,
@@ -51,6 +53,17 @@ export const checkTokenNeedsStorageDeposit = async (page?: string) => {
     }
   }
   return storageNeeded ? storageNeeded.toString() : '';
+};
+export const checkTokenNeedsStorageDeposit_v2 = async () => {
+  let storageNeeded;
+  const balance = await currentStorageBalanceOfFarm_v2(
+    getCurrentWallet().wallet.getAccountId()
+  );
+
+  if (!balance) {
+    storageNeeded = '0.1';
+  }
+  return storageNeeded;
 };
 
 interface StakeOptions {
@@ -98,12 +111,15 @@ export const stake = async ({
 
   return executeFarmMultipleTransactions(transactions);
 };
-
 interface UnstakeOptions {
   seed_id: string;
   amount: string;
   msg?: string;
   poolId?: string;
+}
+interface UnstakeCdOptions {
+  index: number;
+  amount: string;
 }
 export const unstake = async ({
   seed_id,
@@ -142,7 +158,6 @@ export const unstake = async ({
 
   return executeFarmMultipleTransactions(transactions);
 };
-
 interface WithdrawOptions {
   token_id: string;
   amount: string;
@@ -205,7 +220,6 @@ export const withdrawAllReward = async (
   checkedList: Record<string, any>,
   unregister = false
 ) => {
-  debugger;
   const transactions: Transaction[] = [];
   const token_id_list = Object.keys(checkedList);
   const ftBalancePromiseList: any[] = [];
@@ -243,5 +257,106 @@ export const withdrawAllReward = async (
     receiverId: REF_FARM_CONTRACT_ID,
     functionCalls,
   });
+  return executeFarmMultipleTransactions(transactions);
+};
+export const stake_v2 = async ({
+  // todo
+  token_id,
+  amount,
+  msg = '',
+}: StakeOptions) => {
+  const transactions: Transaction[] = [
+    {
+      receiverId: REF_FI_CONTRACT_ID,
+      functionCalls: [
+        {
+          methodName: 'mft_transfer_call',
+          args: {
+            receiver_id: REF_FARM_V2_CONTRACT_ID,
+            token_id,
+            amount,
+            msg,
+          },
+          amount: ONE_YOCTO_NEAR,
+          gas: '180000000000000',
+        },
+      ],
+    },
+  ];
+
+  const neededStorage = await checkTokenNeedsStorageDeposit_v2();
+  if (neededStorage) {
+    transactions.unshift({
+      receiverId: REF_FARM_V2_CONTRACT_ID,
+      functionCalls: [storageDepositAction({ amount: neededStorage })],
+    });
+  }
+
+  return executeFarmMultipleTransactions(transactions);
+};
+export const unstake_v2_free = async ({
+  // todo
+  seed_id,
+  amount,
+  msg = '',
+}: UnstakeOptions) => {
+  const transactions: Transaction[] = [
+    {
+      receiverId: REF_FARM_V2_CONTRACT_ID,
+      functionCalls: [
+        {
+          methodName: 'withdraw_seed',
+          args: {
+            seed_id: seed_id,
+            amount,
+            msg,
+          },
+          amount: ONE_YOCTO_NEAR,
+          gas: '200000000000000',
+        },
+      ],
+    },
+  ];
+
+  const neededStorage = await checkTokenNeedsStorageDeposit_v2();
+  if (neededStorage) {
+    transactions.unshift({
+      receiverId: REF_FARM_V2_CONTRACT_ID,
+      functionCalls: [storageDepositAction({ amount: neededStorage })],
+    });
+  }
+
+  return executeFarmMultipleTransactions(transactions);
+};
+export const unstake_v2_cd = async ({
+  // todo
+  index,
+  amount,
+}: UnstakeCdOptions) => {
+  const transactions: Transaction[] = [
+    {
+      receiverId: REF_FARM_V2_CONTRACT_ID,
+      functionCalls: [
+        {
+          methodName: 'withdraw_seed_from_cd_account',
+          args: {
+            index,
+            amount,
+          },
+          amount: ONE_YOCTO_NEAR,
+          gas: '200000000000000',
+        },
+      ],
+    },
+  ];
+
+  const neededStorage = await checkTokenNeedsStorageDeposit_v2();
+  if (neededStorage) {
+    transactions.unshift({
+      receiverId: REF_FARM_V2_CONTRACT_ID,
+      functionCalls: [storageDepositAction({ amount: neededStorage })],
+    });
+  }
+
   return executeFarmMultipleTransactions(transactions);
 };
