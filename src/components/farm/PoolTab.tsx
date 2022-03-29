@@ -110,11 +110,12 @@ function PoolDetailMag({
 
 export default function PoolTab(props: any) {
   const history = useHistory();
-
-  const poolId = history.location.pathname.split('@').at(-1);
+  const { detailData, tokenPriceList, hidden } = props;
+  // const poolId = history.location.pathname.split('-')[0];
+  const poolId = detailData[0]?.pool?.id;
 
   const { pool, shares, stakeList } = usePool(poolId); // todo
-  const { detailData, tokenPriceList, hidden } = props;
+
   const [activeTab, setActiveTab] = useState<string>('add');
   const tokens = useTokens(pool?.tokenIds);
   const switchTab = (tab: string) => {
