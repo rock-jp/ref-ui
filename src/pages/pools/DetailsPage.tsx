@@ -120,7 +120,11 @@ const formatDate = (rawDate: string) => {
   return moment(date).format('ll');
 };
 
-function Icon(props: { icon?: string; className?: string; style?: any }) {
+export function Icon(props: {
+  icon?: string;
+  className?: string;
+  style?: any;
+}) {
   const { icon, className, style } = props;
   return icon ? (
     <img

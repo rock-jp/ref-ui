@@ -60,6 +60,8 @@ import { ActionModel } from '~pages/AccountPage';
 import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
 import { PoolDetail } from './PoolDetail';
 import { divide, scientificNotationToString } from '../../utils/numbers';
+import { NewFarmPoolSlippageSelector } from '../forms/SlippageSelector';
+import { Icon } from '../../pages/pools/DetailsPage';
 import {
   useMonthTVL,
   useMonthVolume,
@@ -73,6 +75,8 @@ import {
 } from '~state/pool';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
 const ONLY_ZEROS = /^0*\.?0*$/;
+
+const REF_NEW_FARMING_POOL_TAB_KEY = 'REF_NEW_FARMING_POOL_TAB_VALUE';
 
 function PoolDetailMag({
   showReserves,
@@ -107,11 +111,10 @@ function PoolDetailMag({
 export default function PoolTab(props: any) {
   const { pool, shares, stakeList } = usePool('5'); // todo
   const { detailData, tokenPriceList, hidden } = props;
-  const [activeTab, setActiveTab] = useState('add');
-  const [addLiquidityModalVisible, setAddLiquidityModalVisible] =
-    useState(false);
+  const [activeTab, setActiveTab] = useState<string>('add');
   const tokens = useTokens(pool?.tokenIds);
   const switchTab = (tab: string) => {
+    // localStorage.setItem(`${REF_NEW_FARMING_POOL_TAB_KEY}${pool.id}`, tab);
     setActiveTab(tab);
   };
 
@@ -160,8 +163,19 @@ export default function PoolTab(props: any) {
             className={`absolute w-full h-0.5 bottom-0 left-0 rounded-full bg-black bg-opacity-20`}
           ></div>
         </div>
-        <div className="operationArea">
-          <AddLiquidity pool={pool} tokens={tokens}></AddLiquidity>
+        <div
+          className={`operationArea ${
+            activeTab === 'add' ? 'block' : 'hidden'
+          }`}
+        >
+          <AddLiquidity pool={pool} tokens={tokens} />
+        </div>
+        <div
+          className={`operationArea ${
+            activeTab === 'remove' ? 'block' : 'hidden'
+          }`}
+        >
+          <RemoveLiquidity pool={pool} tokens={tokens} shares={shares} />
         </div>
       </div>
       <PoolDetailMag
@@ -497,7 +511,7 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         </div>
       </div>
 
-      <span className="text-3xl text-primaryText mt-4 pl-8 font-thin block relative top-1">
+      <span className="text-3xl text-primaryText mt-4 pl-6 font-thin block relative top-1">
         +
       </span>
 
@@ -531,21 +545,7 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           <Alert level="warn" message={error.message} />
         </div>
       ) : null}
-
-      {canDeposit ? (
-        <div className="flex xs:flex-col md:flex-col justify-between items-center rounded-md p-4 xs:px-2 md:px-2 border border-warnColor">
-          <div className="flex items-center xs:mb-3 md:mb-3">
-            <label className="flex-shrink-0">
-              <WarnTriangle />
-            </label>
-            <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
-              <FormattedMessage id="you_do_not_have_enough" />{' '}
-              {modal?.token?.symbol}！
-            </label>
-          </div>
-        </div>
-      ) : null}
-      <div className="flex justify-between text-primaryText text-sm my-6">
+      <div className="flex justify-between text-primaryText text-sm mt-6 mb-4">
         <label>
           <FormattedMessage id="lp_tokens" defaultMessage={'LP tokens'} />
         </label>
@@ -553,9 +553,182 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           {canDeposit ? '-' : shareDisplay()}
         </span>
       </div>
-      <div className="">
-        <ButtonRender />
+      {canDeposit ? (
+        <div className="flex xs:flex-col md:flex-col justify-between items-center rounded-md mb-6 py-3 px-4 border border-warnColor">
+          <div className="flex items-center xs:mb-3 md:mb-3">
+            <label className="text-base text-warnColor xs:text-sm md:text-sm">
+              <FormattedMessage id="oops" defaultMessage="Oops" />!
+            </label>
+            <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
+              <FormattedMessage id="you_do_not_have_enough" />{' '}
+              {modal?.token?.symbol}.
+            </label>
+          </div>
+        </div>
+      ) : null}
+
+      <ButtonRender />
+    </div>
+  );
+}
+
+export function RemoveLiquidity(props: {
+  pool: Pool;
+  shares: string;
+  tokens: TokenMetadata[];
+}) {
+  const { pool, shares, tokens } = props;
+  const [amount, setAmount] = useState<string>('');
+  const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
+  const { minimumAmounts, removeLiquidity } = useRemoveLiquidity({
+    pool,
+    slippageTolerance,
+    shares: amount ? toNonDivisibleNumber(24, amount) : '0',
+  });
+  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
+  const [canSubmit, setCanSubmit] = useState<boolean>(false);
+  const [error, setError] = useState<Error>();
+  const intl = useIntl();
+
+  const { signedInState } = useContext(WalletContext);
+  const isSignedIn = signedInState.isSignedIn;
+
+  function submit() {
+    const amountBN = new BigNumber(amount?.toString());
+    const shareBN = new BigNumber(toReadableNumber(24, shares));
+    if (Number(amount) === 0) {
+      throw new Error(
+        intl.formatMessage({ id: 'must_input_a_value_greater_than_zero' })
+      );
+    }
+    if (amountBN.isGreaterThan(shareBN)) {
+      throw new Error(
+        intl.formatMessage({
+          id: 'input_greater_than_available_shares',
+        })
+      );
+    }
+    setButtonLoading(true);
+    return removeLiquidity();
+  }
+
+  function handleChangeAmount(value: string) {
+    setAmount(value);
+    setError(null);
+
+    const amountBN = new BigNumber(value.toString());
+    const shareBN = new BigNumber(toReadableNumber(24, shares));
+    if (amountBN.isGreaterThan(shareBN)) {
+      setCanSubmit(false);
+      throw new Error(
+        intl.formatMessage({
+          id: 'input_greater_than_available_tokens',
+          defaultMessage: 'Input greater than available LP tokens',
+        })
+      );
+    }
+    if (ONLY_ZEROS.test(value)) {
+      setCanSubmit(false);
+      return;
+    }
+    setCanSubmit(true);
+  }
+  return (
+    <div className="text-white outline-none mt-8">
+      <div className=" overflow-hidden ">
+        <NewFarmInputAmount
+          maxBorder={false}
+          value={amount}
+          max={toReadableNumber(24, shares)}
+          onChangeAmount={(value) => {
+            try {
+              handleChangeAmount(value);
+            } catch (error) {
+              setError(error);
+            }
+          }}
+          tokenSymbol={
+            <FormattedMessage id="lp_token" defaultMessage="LP Token" />
+          }
+          className="border border-transparent rounded"
+          balance={toReadableNumber(24, shares)}
+          title="Remove"
+        />
       </div>
+      <div className="pt-4 mb-8">
+        <NewFarmPoolSlippageSelector
+          slippageTolerance={slippageTolerance}
+          onChange={setSlippageTolerance}
+        />
+      </div>
+
+      {amount && Number(pool.shareSupply) != 0 ? (
+        <div className="flex items-center justify-between text-white text-sm mb-4">
+          <p className="text-left  text-farmText">
+            <FormattedMessage
+              id="minimum_tokens_out"
+              defaultMessage="Minimum shares"
+            />
+          </p>
+          <div className="flex items-center">
+            {Object.entries(minimumAmounts).map(
+              ([tokenId, minimumAmount], i) => {
+                const token = tokens.find((t) => t.id === tokenId);
+                // console.log(token);
+                return (
+                  <section key={i} className="flex items-center mx-1">
+                    {i ? <span className="mr-2">+</span> : null}
+                    <span className="mr-2 text-base">
+                      {toInternationalCurrencySystem(
+                        toPrecision(
+                          toReadableNumber(token.decimals, minimumAmount),
+                          3
+                        ),
+                        3
+                      )}
+                    </span>
+                    <Icon icon={token?.icon} className="h-5 w-5" />
+                  </section>
+                );
+              }
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="flex justify-center my-5 text-base">
+          <Alert level="warn" message={error.message + '!'} />
+        </div>
+      ) : null}
+      {isSignedIn ? (
+        <SolidButton
+          disabled={!canSubmit}
+          className={`focus:outline-none w-full text-lg`}
+          rounded={'rounded-lg'}
+          padding={'p-4'}
+          onClick={async () => {
+            try {
+              await submit();
+            } catch (error) {
+              setError(error);
+            }
+          }}
+          loading={buttonLoading}
+        >
+          <ButtonTextWrapper
+            loading={buttonLoading}
+            Text={() => (
+              <FormattedMessage
+                id="remove_liquidity"
+                defaultMessage="Remove Liquidity"
+              />
+            )}
+          />
+        </SolidButton>
+      ) : (
+        <ConnectToNearBtn />
+      )}
     </div>
   );
 }
