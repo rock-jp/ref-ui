@@ -251,6 +251,51 @@ export function PoolSlippageSelector({
   );
 }
 
+export function NewFarmPoolSlippageSelector({
+  slippageTolerance,
+  onChange,
+}: {
+  slippageTolerance: number;
+  onChange: (slippage: number) => void;
+}) {
+  const validSlippages = [0.1, 0.5, 1.0];
+  const intl = useIntl();
+  const slippageCopyId = isMobile() ? 'slippageCopyForMobile' : 'slippageCopy';
+
+  return (
+    <>
+      <fieldset className="flex lg:items-center md:flex-col xs:flex-col justify-between mb-4 pt-2">
+        <div className="flex items-center md:mb-4 xs:mb-4">
+          <label className="text-sm text-center text-farmText">
+            <FormattedMessage
+              id="slippage"
+              defaultMessage="Slippage tolerance"
+            />
+          </label>
+          <div className="text-gray-400">
+            <QuestionTip id={slippageCopyId} />
+          </div>
+        </div>
+
+        <div className="flex text-white items-center">
+          {validSlippages.map((slippage) => (
+            <button
+              key={slippage}
+              className={`w-10 focus:outline-none text-xs hover:bg-smBtnBorder  rounded-lg py-1 text-farmText  mx-1 border border-smBtnBorder ${
+                slippage === slippageTolerance ? 'bg-smBtnBorder' : ''
+              }`}
+              type="button"
+              onClick={() => onChange(slippage)}
+            >
+              {slippage}%
+            </button>
+          ))}
+        </div>
+      </fieldset>
+    </>
+  );
+}
+
 export function StableSlipSelecter({
   slippageTolerance,
   onChange,

@@ -20,7 +20,7 @@ import getConfig from '../../services/config';
 import { BigNumber } from 'bignumber.js';
 import moment from 'moment';
 import { useHistory } from 'react-router';
-import InputAmount from '~components/forms/InputAmount';
+import InputAmount, { NewFarmInputAmount } from '~components/forms/InputAmount';
 import {
   toPrecision,
   toReadableNumber,
@@ -55,9 +55,13 @@ import { useWalletTokenBalances } from '../../state/token';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 import { isMobile } from '~utils/device';
 import { Card } from '~components/card/Card';
-import { SmallWallet } from '../../components/icon/SmallWallet';
 import { WarnTriangle } from '~components/icon/SwapRefresh';
 import { ActionModel } from '~pages/AccountPage';
+import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import { PoolDetail } from './PoolDetail';
+import { divide, scientificNotationToString } from '../../utils/numbers';
+import { NewFarmPoolSlippageSelector } from '../forms/SlippageSelector';
+import { Icon } from '../../pages/pools/DetailsPage';
 import {
   useMonthTVL,
   useMonthVolume,
@@ -71,21 +75,60 @@ import {
 } from '~state/pool';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
 const ONLY_ZEROS = /^0*\.?0*$/;
+
+const REF_NEW_FARMING_POOL_TAB_KEY = 'REF_NEW_FARMING_POOL_TAB_VALUE';
+
+function PoolDetailMag({
+  showReserves,
+  setShowReserves,
+}: {
+  showReserves: boolean;
+  setShowReserves: (e?: any) => void;
+}) {
+  return (
+    <span
+      className={`px-5 rounded-t-xl text-sm text-farmText mx-auto flex items-center justify-center cursor-pointer bg-cardBg pt-3 relative bottom-10 ${
+        showReserves ? 'pb-5' : 'pb-1.5'
+      }`}
+      style={{
+        borderTop: '1px solid #415462',
+        width: '175px',
+      }}
+      onClick={() => {
+        setShowReserves(!showReserves);
+      }}
+    >
+      <span>
+        <FormattedMessage id="pool_detail" defaultMessage="Pool Detail" />
+      </span>
+      <span className="ml-2">
+        {showReserves ? <FaAngleUp /> : <FaAngleDown />}
+      </span>
+    </span>
+  );
+}
+
 export default function PoolTab(props: any) {
-  const { pool, shares, stakeList } = usePool('5'); // todo
+  const history = useHistory();
+
+  const poolId = history.location.pathname.split('@').at(-1);
+
+  const { pool, shares, stakeList } = usePool(poolId); // todo
   const { detailData, tokenPriceList, hidden } = props;
-  const [activeTab, setActiveTab] = useState('add');
-  const [addLiquidityModalVisible, setAddLiquidityModalVisible] =
-    useState(false);
+  const [activeTab, setActiveTab] = useState<string>('add');
   const tokens = useTokens(pool?.tokenIds);
   const switchTab = (tab: string) => {
+    // localStorage.setItem(`${REF_NEW_FARMING_POOL_TAB_KEY}${pool.id}`, tab);
     setActiveTab(tab);
   };
+
+  const [showReserves, setShowReserves] = useState(false);
+
   if (!(tokens && tokens.length > 0 && pool)) return null;
   return (
     <>
       <div
-        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-7 py-3 ${
+        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 pt-3 pb-16 ${
           hidden ? 'hidden' : ''
         }`}
       >
@@ -98,7 +141,7 @@ export default function PoolTab(props: any) {
               activeTab == 'add' ? 'text-white' : 'text-primaryText'
             }`}
           >
-            <FormattedMessage id="add_liquidity"></FormattedMessage>
+            <FormattedMessage id="add_liquidity" />
             <div
               className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
                 activeTab == 'add' ? 'bg-greenColor' : ''
@@ -124,10 +167,27 @@ export default function PoolTab(props: any) {
             className={`absolute w-full h-0.5 bottom-0 left-0 rounded-full bg-black bg-opacity-20`}
           ></div>
         </div>
-        <div className="operationArea">
-          <AddLiquidity pool={pool} tokens={tokens}></AddLiquidity>
+        <div
+          className={`operationArea ${
+            activeTab === 'add' ? 'block' : 'hidden'
+          }`}
+        >
+          <AddLiquidity pool={pool} tokens={tokens} />
+        </div>
+        <div
+          className={`operationArea ${
+            activeTab === 'remove' ? 'block' : 'hidden'
+          }`}
+        >
+          <RemoveLiquidity pool={pool} tokens={tokens} shares={shares} />
         </div>
       </div>
+      <PoolDetailMag
+        showReserves={showReserves}
+        setShowReserves={setShowReserves}
+      />
+
+      <PoolDetail pool={pool} showDetail={showReserves} />
     </>
   );
 }
@@ -141,7 +201,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
   const balances = useWalletTokenBalances(tokens.map((token) => token.id));
   const [error, setError] = useState<Error>();
   const intl = useIntl();
-  const history = useHistory();
   const [canSubmit, setCanSubmit] = useState<boolean>(false);
   const [canDeposit, setCanDeposit] = useState<boolean>(false);
   const [buttonLoading, setButtonLoading] = useState<boolean>(false);
@@ -307,11 +366,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         setModal(Object.assign({}, modalData));
       });
       setModal(modalData);
-      // throw new Error(
-      //   `${intl.formatMessage({ id: 'you_do_not_have_enough' })} ${toRealSymbol(
-      //     tokens[1].symbol
-      //   )}`
-      // );
       return;
     }
 
@@ -320,11 +374,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       setMessageId('add_liquidity');
       setDefaultMessage('Add Liquidity');
       return;
-      // throw new Error(
-      //   `${toRealSymbol(tokens[0].symbol)} ${intl.formatMessage({
-      //     id: 'amount_must_be_greater_than_0',
-      //   })} `
-      // );
     }
 
     if (ONLY_ZEROS.test(secondAmount)) {
@@ -332,11 +381,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       setMessageId('add_liquidity');
       setDefaultMessage('Add Liquidity');
       return;
-      // throw new Error(
-      //   `${toRealSymbol(tokens[1].symbol)} ${intl.formatMessage({
-      //     id: 'amount_must_be_greater_than_0',
-      //   })} `
-      // );
     }
 
     if (!tokens[0]) {
@@ -370,8 +414,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
     });
   }
 
-  const cardWidth = isMobile() ? '95vw' : '40vw';
-
   const ButtonRender = () => {
     if (!isSignedIn) {
       return <ConnectToNearBtn />;
@@ -386,9 +428,11 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
     return (
       <SolidButton
         disabled={!canSubmit || canDeposit}
-        className="focus:outline-none px-4 w-full"
+        className="focus:outline-none  w-full text-lg"
         onClick={handleClick}
         loading={buttonLoading}
+        padding={'p-4'}
+        rounded={'rounded-lg'}
       >
         <div className="flex items-center justify-center w-full m-auto">
           <div>
@@ -406,30 +450,50 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       </SolidButton>
     );
   };
+
   const shareDisplay = () => {
     let result = '';
+    let percentShare = '';
+    let displayPercentShare = '';
     if (preShare && new BigNumber('0').isLessThan(preShare)) {
       const myShareBig = new BigNumber(preShare);
       if (myShareBig.isLessThan('0.001')) {
         result = '<0.001';
       } else {
-        result = `≈ ${myShareBig.toFixed(3)}`;
+        result = `${myShareBig.toFixed(3)}`;
       }
     } else {
       result = '-';
     }
-    return result;
+
+    if (result !== '-') {
+      percentShare = `${percent(
+        preShare,
+        toReadableNumber(24, pool.shareSupply)
+      )}`;
+
+      if (Number(percentShare) > 0 && Number(percentShare) < 0.01) {
+        displayPercentShare = '< 0.01%';
+      } else {
+        displayPercentShare = `${toPrecision(percentShare, 2)}%`;
+      }
+    }
+
+    return (
+      <span className="flex items-center">
+        <span>{`${result}`}</span>
+        <span className="text-xs ml-1 text-farmText">{`${displayPercentShare}`}</span>
+      </span>
+    );
   };
   return (
     <div className="text-white outline-none">
-      <div className="mt-8 md:hidden xs:hidden">
-        <div className="flex justify-end items-center text-xs text-right mb-1 text-gray-400">
-          <span className="mr-2 text-primaryText">
-            <SmallWallet />
-          </span>
+      <div className="mt-8">
+        <div className="flex justify-end items-center text-sm text-right mb-1.5 text-farmText">
           <FormattedMessage id="balance" defaultMessage="Balance" />
-          :&nbsp;
+          {':'}
           <span
+            className="ml-1"
             title={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
           >
             {toPrecision(
@@ -440,28 +504,26 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           </span>
         </div>
         <div className="flex items-center ">
-          <div className="flex items-center mr-4 w-1/3">
-            <Icon icon={tokens[0].icon} className="h-9 w-9 mr-2" />
-            <div className="text-white text-base" title={tokens[0].id}>
-              {toRealSymbol(tokens[0].symbol)}
-            </div>
-          </div>
-          <InputAmount
+          <NewFarmInputAmount
             className="w-full border border-transparent rounded"
             max={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
             onChangeAmount={changeFirstTokenAmount}
             value={firstTokenAmount}
+            tokenSymbol={toRealSymbol(tokens[0].symbol)}
           />
         </div>
       </div>
-      <div className="my-8 md:hidden xs:hidden">
-        <div className="flex justify-end items-center text-xs text-right mb-1 text-gray-400">
-          <span className="mr-2 text-primaryText">
-            <SmallWallet />
-          </span>
+
+      <span className="text-3xl text-primaryText mt-4 pl-6 font-thin block relative top-1">
+        +
+      </span>
+
+      <div className="mb-8">
+        <div className="flex justify-end items-center text-sm text-right mb-1.5 text-farmText">
           <FormattedMessage id="balance" defaultMessage="Balance" />
-          :&nbsp;
+          {':'}
           <span
+            className="ml-1"
             title={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
           >
             {toPrecision(
@@ -472,17 +534,12 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           </span>
         </div>
         <div className="flex items-center">
-          <div className="flex items-center mr-4 w-1/3">
-            <Icon icon={tokens[1].icon} className="h-9 w-9 mr-2" />
-            <div className="text-white text-base" title={tokens[1].id}>
-              {toRealSymbol(tokens[1].symbol)}
-            </div>
-          </div>
-          <InputAmount
+          <NewFarmInputAmount
             className="w-full border border-transparent rounded"
             max={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
             onChangeAmount={changeSecondTokenAmount}
             value={secondTokenAmount}
+            tokenSymbol={toRealSymbol(tokens[1].symbol)}
           />
         </div>
       </div>
@@ -491,44 +548,190 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
           <Alert level="warn" message={error.message} />
         </div>
       ) : null}
-
+      <div className="flex justify-between text-primaryText text-sm mt-6 mb-4">
+        <label>
+          <FormattedMessage id="lp_tokens" defaultMessage={'LP tokens'} />
+        </label>
+        <span className="text-white text-sm">
+          {canDeposit ? '-' : shareDisplay()}
+        </span>
+      </div>
       {canDeposit ? (
-        <div className="flex xs:flex-col md:flex-col justify-between items-center rounded-md p-4 xs:px-2 md:px-2 border border-warnColor">
+        <div className="flex xs:flex-col md:flex-col justify-between items-center rounded-md mb-6 py-3 px-4 border border-warnColor">
           <div className="flex items-center xs:mb-3 md:mb-3">
-            <label className="flex-shrink-0">
-              <WarnTriangle />
+            <label className="text-base text-warnColor xs:text-sm md:text-sm">
+              <FormattedMessage id="oops" defaultMessage="Oops" />!
             </label>
             <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
               <FormattedMessage id="you_do_not_have_enough" />{' '}
-              {modal?.token?.symbol}！
+              {modal?.token?.symbol}.
             </label>
           </div>
         </div>
       ) : null}
-      <div className="flex justify-between text-primaryText text-sm my-6">
-        <label>
-          <FormattedMessage id="my_shares"></FormattedMessage>
-        </label>
-        <span className="text-white text-sm">{shareDisplay()}</span>
-      </div>
-      <div className="">
-        <ButtonRender />
-      </div>
+
+      <ButtonRender />
     </div>
   );
 }
-function Icon(props: { icon?: string; className?: string; style?: any }) {
-  const { icon, className, style } = props;
-  return icon ? (
-    <img
-      className={`block ${className} rounded-full border border-gradientFromHover border-solid`}
-      src={icon}
-      style={style}
-    />
-  ) : (
-    <div
-      className={`rounded-full ${className} border border-gradientFromHover  border-solid`}
-      style={style}
-    />
+
+export function RemoveLiquidity(props: {
+  pool: Pool;
+  shares: string;
+  tokens: TokenMetadata[];
+}) {
+  const { pool, shares, tokens } = props;
+  const [amount, setAmount] = useState<string>('');
+  const [slippageTolerance, setSlippageTolerance] = useState<number>(0.5);
+  const { minimumAmounts, removeLiquidity } = useRemoveLiquidity({
+    pool,
+    slippageTolerance,
+    shares: amount ? toNonDivisibleNumber(24, amount) : '0',
+  });
+  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
+  const [canSubmit, setCanSubmit] = useState<boolean>(false);
+  const [error, setError] = useState<Error>();
+  const intl = useIntl();
+
+  const { signedInState } = useContext(WalletContext);
+  const isSignedIn = signedInState.isSignedIn;
+
+  function submit() {
+    const amountBN = new BigNumber(amount?.toString());
+    const shareBN = new BigNumber(toReadableNumber(24, shares));
+    if (Number(amount) === 0) {
+      throw new Error(
+        intl.formatMessage({ id: 'must_input_a_value_greater_than_zero' })
+      );
+    }
+    if (amountBN.isGreaterThan(shareBN)) {
+      throw new Error(
+        intl.formatMessage({
+          id: 'input_greater_than_available_shares',
+        })
+      );
+    }
+    setButtonLoading(true);
+    return removeLiquidity();
+  }
+
+  function handleChangeAmount(value: string) {
+    setAmount(value);
+    setError(null);
+
+    const amountBN = new BigNumber(value.toString());
+    const shareBN = new BigNumber(toReadableNumber(24, shares));
+    if (amountBN.isGreaterThan(shareBN)) {
+      setCanSubmit(false);
+      throw new Error(
+        intl.formatMessage({
+          id: 'input_greater_than_available_tokens',
+          defaultMessage: 'Input greater than available LP tokens',
+        })
+      );
+    }
+    if (ONLY_ZEROS.test(value)) {
+      setCanSubmit(false);
+      return;
+    }
+    setCanSubmit(true);
+  }
+  return (
+    <div className="text-white outline-none mt-8">
+      <div className=" overflow-hidden ">
+        <NewFarmInputAmount
+          maxBorder={false}
+          value={amount}
+          max={toReadableNumber(24, shares)}
+          onChangeAmount={(value) => {
+            try {
+              handleChangeAmount(value);
+            } catch (error) {
+              setError(error);
+            }
+          }}
+          tokenSymbol={
+            <FormattedMessage id="lp_token" defaultMessage="LP Token" />
+          }
+          className="border border-transparent rounded"
+          balance={toReadableNumber(24, shares)}
+          title="Remove"
+        />
+      </div>
+      <div className="pt-4 mb-8">
+        <NewFarmPoolSlippageSelector
+          slippageTolerance={slippageTolerance}
+          onChange={setSlippageTolerance}
+        />
+      </div>
+
+      {amount && Number(pool.shareSupply) != 0 ? (
+        <div className="flex items-center justify-between text-white text-sm mb-4">
+          <p className="text-left  text-farmText">
+            <FormattedMessage
+              id="minimum_tokens_out"
+              defaultMessage="Minimum shares"
+            />
+          </p>
+          <div className="flex items-center">
+            {Object.entries(minimumAmounts).map(
+              ([tokenId, minimumAmount], i) => {
+                const token = tokens.find((t) => t.id === tokenId);
+                // console.log(token);
+                return (
+                  <section key={i} className="flex items-center mx-1">
+                    {i ? <span className="mr-2">+</span> : null}
+                    <span className="mr-2 text-base">
+                      {toInternationalCurrencySystem(
+                        toPrecision(
+                          toReadableNumber(token.decimals, minimumAmount),
+                          3
+                        ),
+                        3
+                      )}
+                    </span>
+                    <Icon icon={token?.icon} className="h-5 w-5" />
+                  </section>
+                );
+              }
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="flex justify-center mb-5 mt-8 text-base">
+          <Alert level="warn" message={error.message + '!'} />
+        </div>
+      ) : null}
+      {isSignedIn ? (
+        <SolidButton
+          disabled={!canSubmit}
+          className={`focus:outline-none w-full text-lg`}
+          rounded={'rounded-lg'}
+          padding={'p-4'}
+          onClick={async () => {
+            try {
+              await submit();
+            } catch (error) {
+              setError(error);
+            }
+          }}
+          loading={buttonLoading}
+        >
+          <ButtonTextWrapper
+            loading={buttonLoading}
+            Text={() => (
+              <FormattedMessage
+                id="remove_liquidity"
+                defaultMessage="Remove Liquidity"
+              />
+            )}
+          />
+        </SolidButton>
+      ) : (
+        <ConnectToNearBtn />
+      )}
+    </div>
   );
 }

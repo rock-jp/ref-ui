@@ -28,8 +28,9 @@ module.exports = {
         darkGradientBg: 'linear-gradient(180deg, #1D2932 0%, #001320 100%)',
         darkGradientHoverBg:
           'linear-gradient(180deg, #24313A 0%, #14212B 100%)',
-        switchButtonGradientBg:'linear-gradient(90deg, #00C6A2 24.14%, #008B72 72.41%)',
-        unLockedbg: 'linear-gradient(180deg, #FFB36D 0%, #D27E00 100%)'
+        switchButtonGradientBg:
+          'linear-gradient(90deg, #00C6A2 24.14%, #008B72 72.41%)',
+        unLockedbg: 'linear-gradient(180deg, #FFB36D 0%, #D27E00 100%)',
       }),
       gridTemplateColumns: {
         farmSearch: '2fr 1fr',
@@ -93,15 +94,21 @@ module.exports = {
         darkGreenColor: '#009A2B',
         riskTextColor: '#BEBEBE',
         senderHot: '#00FFD1',
-        farmV2TabColor:'#4A5862',
-        farmV2SmallTabCOlor:'#1A2329',
-        farmV2BoxBg:'#141D24',
-        farmV2WithDrawBg:'#151E29',
-        maxBorderColor:'#373F45',
-        darkBg:'#111518',
-        lightBg:'#C4C4C4',
-        lockedBg:'#323C43',
-        redwarningColor:'#FF7575'
+        smBtnBorder: '#373F45',
+        charBtnBg: '#4A5862',
+        farmV2TabColor: '#4A5862',
+        farmV2SmallTabCOlor: '#1A2329',
+        farmV2BoxBg: '#141D24',
+        farmV2WithDrawBg: '#151E29',
+        farmV2TabColor: '#4A5862',
+        farmV2SmallTabCOlor: '#1A2329',
+        farmV2BoxBg: '#141D24',
+        farmV2WithDrawBg: '#151E29',
+        maxBorderColor: '#373F45',
+        darkBg: '#111518',
+        lightBg: '#C4C4C4',
+        lockedBg: '#323C43',
+        redwarningColor: '#FF7575',
       },
       fontFamily: {
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],

@@ -259,7 +259,7 @@ const vi = {
   roi_calculator: 'Tính ROI',
   lp_staked: 'LP staked',
   usd: 'USD',
-  lp_token: 'LP token',
+  lp_token: 'LP Token',
   stake_for: 'Thời hạn',
   day_1: '1D',
   day_2: '7D',

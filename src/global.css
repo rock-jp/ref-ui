@@ -533,6 +533,14 @@ input[type='range']::-webkit-slider-runnable-track {
   animation: showfrombottomMobile 1s both;
 }
 
+.pool-detail-tvl-chart .recharts-active-dot > circle {
+  /* fill: #fff; */
+  stroke: #00c6a2;
+  fill: #1d2932;
+  stroke-width: 1;
+  opacity: 1 !important;
+}
+
 .Toastify__toast-body {
   margin: 0 0 !important;
   padding: 0 0 !important;

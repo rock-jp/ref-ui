@@ -327,6 +327,8 @@ export interface volumeDataType {
 export const useMonthVolume = (pool_id: string) => {
   const [monthVolumeById, setMonthVolumeById] = useState<volumeDataType[]>();
   useEffect(() => {
+    if (!pool_id) return;
+
     getPoolMonthVolume(pool_id).then((res) => {
       const monthVolume = res
         .map((v, i) => {
@@ -338,7 +340,7 @@ export const useMonthVolume = (pool_id: string) => {
         .reverse();
       setMonthVolumeById(monthVolume);
     });
-  }, []);
+  }, [pool_id]);
 
   return monthVolumeById;
 };
@@ -369,6 +371,7 @@ export interface TVLDataType {
 export const useMonthTVL = (pool_id: string) => {
   const [monthTVLById, setMonthTVLById] = useState<TVLDataType[]>();
   useEffect(() => {
+    if (!pool_id) return;
     getPoolMonthTVL(pool_id).then((res) => {
       const minDay = _.minBy(res, (o) => {
         return Number(o.asset_tvl) + Number(o.fiat_tvl);
@@ -389,7 +392,7 @@ export const useMonthTVL = (pool_id: string) => {
         .reverse();
       setMonthTVLById(monthTVL);
     });
-  }, []);
+  }, [pool_id]);
 
   return monthTVLById;
 };
@@ -397,6 +400,7 @@ export const useMonthTVL = (pool_id: string) => {
 export const useDayVolume = (pool_id: string) => {
   const [dayVolume, setDayVolume] = useState<string>();
   useEffect(() => {
+    if (!pool_id) return;
     get24hVolume(pool_id).then(setDayVolume);
   }, [pool_id]);
   return dayVolume;
