@@ -28,6 +28,7 @@ export default function FarmsPageV2(props: any) {
           detailData={detailData}
           tokenPriceList={tokenPriceList}
           emptyDetailData={emptyDetailData}
+          urlParamId={props.match.params.id}
         ></FarmsDetail>
       ) : null}
     </>

@@ -382,5 +382,6 @@ const zh_CN = {
   Rewards: '奖励',
   free: '活期',
   lp_tokens: 'LP tokens',
+  connect_to_wallet: '连接钱包',
 };
 export default zh_CN;

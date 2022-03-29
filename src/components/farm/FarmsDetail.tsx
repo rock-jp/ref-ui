@@ -27,17 +27,24 @@ import {
 } from '../../services/m-token';
 import { useTokens } from '~state/token';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
-
+const getInitTopActiveTab = (props: any): any => {
+  const urlParamId = props.urlParamId;
+  const paramArr = urlParamId.split('-');
+  const result: any = {};
+  if (paramArr[1] == 's') {
+    result.tab = 'stake';
+  } else {
+    result.tab = 'pool';
+  }
+  result.status = paramArr[2];
+  return result;
+};
 export default function FarmsDetail(props: any) {
-  const [topActiveTab, setTopActiveTab] = useState('pool');
-  const history = useHistory();
   const { detailData, emptyDetailData, tokenPriceList } = props;
-  // const location = useLocation();
-  // const searchApi = new URLSearchParams(location.search);
-  // const activeTab = searchApi.get('activeTab');
-  // const status = searchApi.get('status');
-  // const seedId = match.params.seedId;
-  // const { activeTab, status } = location.state || {};
+  const [topActiveTab, setTopActiveTab] = useState(
+    getInitTopActiveTab(props).tab
+  );
+  const history = useHistory();
   const seedId = detailData[0]['seed_id'];
   const pool = detailData[0]['pool'];
   const { token_account_ids } = pool;
@@ -73,7 +80,16 @@ export default function FarmsDetail(props: any) {
     return tokenList;
   };
   const switchTopTab = (tab: string) => {
+    const tabMap = {
+      pool: 'p',
+      stake: 's',
+    };
     setTopActiveTab(tab);
+    history.replace({
+      pathname: `/farmsV2/${pool.id}-${tabMap[tab]}-${
+        getInitTopActiveTab(props).status
+      }`,
+    });
   };
   return (
     <div className={`w-1/3 m-auto`} style={{ minWidth: '580px' }}>

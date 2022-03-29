@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useState, useEffect } from 'react';
 import {
   ArrowLeftIcon,
   GoldLevel1,
@@ -14,6 +13,7 @@ import {
   GradientButton,
   ButtonTextWrapper,
   OprationButton,
+  ConnectToNearButton,
 } from '~components/button/Button';
 import { ModalClose } from '~components/icon';
 import { getUnclaimedReward, list_user_seed_info } from '~services/farm';
@@ -58,14 +58,18 @@ import { Checkbox, CheckboxSelected } from '~components/icon';
 import { ErrorTriangle } from '~components/icon/SwapRefresh';
 import { ftGetTokenMetadata } from '../../services/ft-contract';
 import { useTokens } from '~state/token';
-import { e } from 'mathjs';
+import { useHistory } from 'react-router-dom';
+import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
-
 export default function StakeTab(props: any) {
-  const [activeTab, setActiveTab] = useState('stake');
+  const { signedInState } = useContext(WalletContext);
+  const isSignedIn = signedInState.isSignedIn;
+  const [activeTab, setActiveTab] = useState(
+    !isSignedIn || getFarmsStatus() == 'r' ? 'stake' : 'unstake'
+  );
   const [cd_strategy, set_cd_strategy] = useState<any[]>();
   const [serverTime, setServerTime] = useState<string | number>();
-  // const [seedDetail, setSeedDetail] = useState(null);
+  const history = useHistory();
   const { detailData, tokenPriceList, hidden } = props;
   const seedId = detailData[0]['seed_id'];
   const pool = detailData[0]['pool'];
@@ -102,6 +106,17 @@ export default function StakeTab(props: any) {
     });
     set_cd_strategy(list);
   };
+  function getUrlParams() {
+    const pathArr = location.pathname.split('/');
+    const id = pathArr[2] || '';
+    return id;
+  }
+  function getFarmsStatus() {
+    const urlParamId = getUrlParams();
+    const status = urlParamId.split('-')[2];
+    return status;
+  }
+  const farmsStatus = getFarmsStatus();
   return (
     <div className={`${hidden ? 'hidden' : ''}`}>
       <div className={`takeBox relative mt-7 bg-cardBg rounded-2xl px-7 py-3`}>
@@ -110,9 +125,9 @@ export default function StakeTab(props: any) {
             onClick={() => {
               switchTab('stake');
             }}
-            className={`flex relative items-center w-1/2 text-lg py-3.5  pl-20 cursor-pointer ${
-              activeTab == 'stake' ? 'text-white' : 'text-primaryText'
-            }`}
+            className={`relative items-center w-1/2 text-lg py-3.5  pl-20 cursor-pointer ${
+              farmsStatus == 'e' ? 'hidden' : 'flex'
+            } ${activeTab == 'stake' ? 'text-white' : 'text-primaryText'}`}
           >
             <FormattedMessage id="stake"></FormattedMessage>
             <div
@@ -125,9 +140,9 @@ export default function StakeTab(props: any) {
             onClick={() => {
               switchTab('unstake');
             }}
-            className={`flex relative items-center w-1/2  text-lg py-3.5 pl-20 cursor-pointer ${
-              activeTab == 'unstake' ? 'text-white' : 'text-primaryText'
-            }`}
+            className={`flex relative w-1/2 items-center text-lg py-3.5 pl-20 cursor-pointer ${
+              !isSignedIn ? 'hidden' : ''
+            } ${activeTab == 'unstake' ? 'text-white' : 'text-primaryText'}`}
           >
             <FormattedMessage id="unstake"></FormattedMessage>
             <div
@@ -136,9 +151,6 @@ export default function StakeTab(props: any) {
               }`}
             ></div>
           </div>
-          <div
-            className={`absolute w-full h-0.5 bottom-0 left-0 rounded-full bg-black bg-opacity-20`}
-          ></div>
         </div>
         {activeTab == 'stake' ? (
           <>
@@ -153,13 +165,15 @@ export default function StakeTab(props: any) {
           </>
         ) : null}
       </div>
-      <StakedList
-        activeTab={activeTab}
-        detailData={detailData}
-        tokenPriceList={tokenPriceList}
-        cd_strategy={cd_strategy}
-        serverTime={serverTime}
-      ></StakedList>
+      {isSignedIn ? (
+        <StakedList
+          activeTab={activeTab}
+          detailData={detailData}
+          tokenPriceList={tokenPriceList}
+          cd_strategy={cd_strategy}
+          serverTime={serverTime}
+        ></StakedList>
+      ) : null}
     </div>
   );
 }
@@ -214,6 +228,8 @@ function StakeArea(props: any) {
   const seedId = detailData[0]['seed_id'];
   const pool = detailData[0]['pool'];
   const intl = useIntl();
+  const { signedInState } = useContext(WalletContext);
+  const isSignedIn = signedInState.isSignedIn;
   useEffect(() => {
     getStakeBalance(pool.id);
   }, []);
@@ -512,19 +528,23 @@ function StakeArea(props: any) {
           />
         ) : null}
       </div>
-      <GradientButton
-        onClick={() => {
-          setStakeModalVisible(true);
-        }}
-        color="#fff"
-        disabled={isDisabled}
-        btnClassName={`${isDisabled ? 'cursor-not-allowed' : ''}`}
-        className={`mt-6 w-full h-12 text-center text-base text-white focus:outline-none font-semibold ${
-          isDisabled ? 'opacity-40 cursor-not-allowed' : ''
-        }`}
-      >
-        <FormattedMessage id="stake" defaultMessage="Stake" />
-      </GradientButton>
+      {isSignedIn ? (
+        <GradientButton
+          onClick={() => {
+            setStakeModalVisible(true);
+          }}
+          color="#fff"
+          disabled={isDisabled}
+          btnClassName={`${isDisabled ? 'cursor-not-allowed' : ''}`}
+          className={`mt-6 w-full h-12 text-center text-base text-white focus:outline-none font-semibold ${
+            isDisabled ? 'opacity-40 cursor-not-allowed' : ''
+          }`}
+        >
+          <FormattedMessage id="stake" defaultMessage="Stake" />
+        </GradientButton>
+      ) : (
+        <ConnectToNearButton className="mt-6"></ConnectToNearButton>
+      )}
       {stakeModalVisible ? (
         <StakeModal
           title="stake"
@@ -542,6 +562,8 @@ function StakeArea(props: any) {
   );
 }
 function StakedList(props: any) {
+  const { signedInState } = useContext(WalletContext);
+  const isSignedIn = signedInState.isSignedIn;
   const [seedUserInfo, setSeedUserInfo] = useState<Record<string, any>>({});
   const [unclaimedRewardData, setUnclaimedRewardData] =
     useState<Record<string, any>>(null);

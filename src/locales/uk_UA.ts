@@ -375,5 +375,6 @@ const uk_UA = {
   Rewards: 'Rewards',
   free: 'Free',
   lp_tokens: 'LP tokens',
+  connect_to_wallet: 'Connect Wallet',
 };
 export default uk_UA;

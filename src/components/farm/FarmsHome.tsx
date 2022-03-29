@@ -8,7 +8,11 @@ import {
   UpArrowIcon,
   SnakeImg,
 } from '~components/icon/FarmV2';
-import { GradientButton, ButtonTextWrapper } from '~components/button/Button';
+import {
+  GradientButton,
+  ButtonTextWrapper,
+  ConnectToNearButton,
+} from '~components/button/Button';
 import { Checkbox, CheckboxSelected, SortIcon } from '~components/icon';
 import QuestionMark from '~components/farm/QuestionMark';
 import ReactTooltip from 'react-tooltip';
@@ -101,6 +105,7 @@ export default function FarmsHome(props: any) {
   let [coin, setCoin] = useState('all');
   const { getDetailData } = props;
   const location = useLocation();
+  const history = useHistory();
   /** search area options end **/
   useEffect(() => {
     init();
@@ -108,8 +113,8 @@ export default function FarmsHome(props: any) {
   }, [isSignedIn]);
   function getUrlParams() {
     const pathArr = location.pathname.split('/');
-    const seedId = pathArr[2] || '';
-    return seedId;
+    const id = pathArr[2] || '';
+    return id;
   }
   async function init() {
     let requestList: [
@@ -195,16 +200,42 @@ export default function FarmsHome(props: any) {
       const farmEnded = current.farm_status === 'Ended';
 
       if (farmEnded) {
-        tempMap[current.start_at + current.seed_id] =
-          tempMap[current.start_at + current.seed_id] || [];
-        tempMap[current.start_at + current.seed_id].push(current);
+        tempMap[current.seed_id + current.start_at] =
+          tempMap[current.seed_id + current.start_at] || [];
+        tempMap[current.seed_id + current.start_at].push(current);
       } else {
         tempMap[current.seed_id] = tempMap[current.seed_id] || [];
         tempMap[current.seed_id].push(current);
       }
     }
-    const seedId = getUrlParams();
-    getDetailData(tempMap[seedId], tokenPriceList);
+    /** get the specified farms start*/
+    const ids = getUrlParams() || '';
+    if (ids) {
+      let targetFarms;
+      const idArr = ids.split('-');
+      const poolId = idArr[0];
+      const farmsStatus = idArr[2];
+      const contractId = Object.keys(tempMap)[0]?.split('@')[0];
+      const seedId = contractId + '@' + poolId;
+      if (farmsStatus == 'r') {
+        // running
+        targetFarms = tempMap[seedId];
+      } else if (farmsStatus == 'e') {
+        // ending
+        const mergedFarmList = Object.values(tempMap);
+        targetFarms = mergedFarmList.find((farms: FarmKind[]) => {
+          if (farms[0].seed_id == seedId && farms[0].farm_status == 'Ended') {
+            return farms;
+          }
+        });
+      }
+      if (!targetFarms) {
+        history.replace('/farmsV2');
+      } else {
+        getDetailData(targetFarms, tokenPriceList);
+      }
+    }
+    /** get the specified farms end*/
     const mergedFarms = Object.values(tempMap);
     mergedFarms.forEach((farms: FarmKind[] & extendType) => {
       const poolId = farms[0].pool.id;
@@ -582,6 +613,8 @@ function FarmView(props: {
     seedTotalStakedAmount,
     userStakedAmount,
   } = farms[0];
+  const { signedInState } = useContext(WalletContext);
+  const isSignedIn = signedInState.isSignedIn;
   const { token_account_ids, id } = pool;
   const [claimLoading, setClaimLoading] = useState(false);
   const [calcVisible, setCalcVisible] = useState(false);
@@ -867,13 +900,10 @@ function FarmView(props: {
         });
     }
   }
-  function goFarmDetail(seedId: string, status: string, goPage: string) {
+  function goFarmDetail(farm: FarmKind, tab: string) {
+    const status = farm.farm_status == 'Ended' ? 'e' : 'r';
     history.replace({
-      pathname: `/farmsV2/${seedId}`,
-      state: {
-        activeTab: goPage,
-        status: status,
-      },
+      pathname: `/farmsV2/${farm?.pool?.id}-${tab}-${status}`,
     });
     getDetailData(farms, tokenPriceList);
   }
@@ -907,7 +937,7 @@ function FarmView(props: {
             </span>
             <span
               onClick={() => {
-                goFarmDetail(farms[0].seed_id, 'running', 'pool');
+                goFarmDetail(farms[0], 'p');
               }}
               className="flex items-center cursor-pointer text-white font-bold text-lg ml-4"
             >
@@ -1024,113 +1054,121 @@ function FarmView(props: {
       <div className="w-1/3 xs:w-full md:w-full flex m-auto justify-center">
         {error ? <Alert level="warn" message={error.message} /> : null}
       </div>
-      {Number(farms[0].userStakedAmount) > 0 ? (
-        <div className="operateArea flex items-center justify-between bg-farmV2BoxBg px-6 py-3.5 h-20">
-          <div>
-            <div className="flex items-center text-sm text-farmText">
-              <FormattedMessage id="my_shares" />
-
-              <div
-                className="text-white"
-                data-class="reactTip"
-                data-for={'yourShareId' + farms[0].farm_id}
-                data-place="top"
-                data-html={true}
-                data-tip={getUserSharesTip()}
-              >
-                {getUserShares()}
-                <ReactTooltip
-                  id={'yourShareId' + farms[0].farm_id}
-                  backgroundColor="#1D2932"
-                  border
-                  borderColor="#7e8a93"
-                  effect="solid"
-                />
-              </div>
-            </div>
-            <div className="flex items-center text-sm text-farmText">
-              <FormattedMessage id="rewards" />
-              <div
-                className="text-white text-right"
-                data-class="reactTip"
-                data-for={'unclaimedRewardId' + farms[0].farm_id}
-                data-place="top"
-                data-html={true}
-                data-tip={getTotalUnclaimedRewardsTip()}
-              >
-                <span className="text-white text-lg  mx-3">
-                  {getTotalUnclaimedRewards()}
-                </span>
-                <ReactTooltip
-                  id={'unclaimedRewardId' + farms[0].farm_id}
-                  backgroundColor="#1D2932"
-                  border
-                  borderColor="#7e8a93"
-                  effect="solid"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center">
-            {isEnded() ? (
-              <GradientButton
-                onClick={() => {
-                  goFarmDetail(farms[0].seed_id, 'ended', 'stake');
-                }}
-                color="#fff"
-                className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold `}
-              >
-                <FormattedMessage id="unstake" defaultMessage="Unstake" />
-              </GradientButton>
-            ) : (
-              <GradientButton
-                onClick={() => {
-                  goFarmDetail(farms[0].seed_id, 'running', 'stake');
-                }}
-                color="#fff"
-                className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold `}
-              >
-                <FormattedMessage id="stake" defaultMessage="Stake" />
-              </GradientButton>
-            )}
-            {haveUnclaimedReward() ? (
-              <GradientButton
-                color="#fff"
-                onClick={() => claimReward()}
-                disabled={claimLoading}
-                className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold ml-3 `}
-                loading={claimLoading}
-              >
-                <div>
-                  <ButtonTextWrapper
-                    loading={claimLoading}
-                    Text={() => (
-                      <FormattedMessage
-                        id={farms.length > 1 ? 'claim_all' : 'claim'}
-                      />
-                    )}
-                  />
-                </div>
-              </GradientButton>
-            ) : null}
-          </div>
-        </div>
-      ) : (
+      {isSignedIn ? (
         <>
-          {isEnded() ? null : (
-            <div className="foperateArea items-center px-6 py-3.5  h-20">
-              <GradientButton
-                onClick={() => {
-                  goFarmDetail(farms[0].seed_id, 'running', 'stake');
-                }}
-                color="#fff"
-                className={`w-full h-10 text-center text-base text-white focus:outline-none font-semibold `}
-              >
-                <FormattedMessage id="stake" defaultMessage="Stake" />
-              </GradientButton>
+          {Number(farms[0].userStakedAmount) > 0 ? (
+            <div className="operateArea flex items-center justify-between bg-farmV2BoxBg px-6 py-3.5 h-20">
+              <div>
+                <div className="flex items-center text-sm text-farmText">
+                  <FormattedMessage id="my_shares" />
+
+                  <div
+                    className="text-white"
+                    data-class="reactTip"
+                    data-for={'yourShareId' + farms[0].farm_id}
+                    data-place="top"
+                    data-html={true}
+                    data-tip={getUserSharesTip()}
+                  >
+                    {getUserShares()}
+                    <ReactTooltip
+                      id={'yourShareId' + farms[0].farm_id}
+                      backgroundColor="#1D2932"
+                      border
+                      borderColor="#7e8a93"
+                      effect="solid"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center text-sm text-farmText">
+                  <FormattedMessage id="rewards" />
+                  <div
+                    className="text-white text-right"
+                    data-class="reactTip"
+                    data-for={'unclaimedRewardId' + farms[0].farm_id}
+                    data-place="top"
+                    data-html={true}
+                    data-tip={getTotalUnclaimedRewardsTip()}
+                  >
+                    <span className="text-white text-lg  mx-3">
+                      {getTotalUnclaimedRewards()}
+                    </span>
+                    <ReactTooltip
+                      id={'unclaimedRewardId' + farms[0].farm_id}
+                      backgroundColor="#1D2932"
+                      border
+                      borderColor="#7e8a93"
+                      effect="solid"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center">
+                {isEnded() ? (
+                  <GradientButton
+                    onClick={() => {
+                      goFarmDetail(farms[0], 's');
+                    }}
+                    color="#fff"
+                    className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold `}
+                  >
+                    <FormattedMessage id="unstake" defaultMessage="Unstake" />
+                  </GradientButton>
+                ) : (
+                  <GradientButton
+                    onClick={() => {
+                      goFarmDetail(farms[0], 's');
+                    }}
+                    color="#fff"
+                    className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold `}
+                  >
+                    <FormattedMessage id="stake" defaultMessage="Stake" />
+                  </GradientButton>
+                )}
+                {haveUnclaimedReward() ? (
+                  <GradientButton
+                    color="#fff"
+                    onClick={() => claimReward()}
+                    disabled={claimLoading}
+                    className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold ml-3 `}
+                    loading={claimLoading}
+                  >
+                    <div>
+                      <ButtonTextWrapper
+                        loading={claimLoading}
+                        Text={() => (
+                          <FormattedMessage
+                            id={farms.length > 1 ? 'claim_all' : 'claim'}
+                          />
+                        )}
+                      />
+                    </div>
+                  </GradientButton>
+                ) : null}
+              </div>
             </div>
+          ) : (
+            <>
+              {isEnded() ? null : (
+                <div className="foperateArea items-center px-6 py-3.5 h-20">
+                  <GradientButton
+                    onClick={() => {
+                      goFarmDetail(farms[0], 's');
+                    }}
+                    color="#fff"
+                    className={`w-full h-10 text-center text-base text-white focus:outline-none font-semibold `}
+                  >
+                    <FormattedMessage id="stake" defaultMessage="Stake" />
+                  </GradientButton>
+                </div>
+              )}
+            </>
           )}
         </>
+      ) : (
+        <div className="px-6 mb-5 mt-3">
+          <ConnectToNearButton></ConnectToNearButton>
+        </div>
       )}
       {calcVisible ? (
         <CalcModelV2

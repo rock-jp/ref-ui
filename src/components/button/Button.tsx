@@ -378,3 +378,47 @@ export function OprationButton(
     </div>
   );
 }
+export function ConnectToNearButton(props: any) {
+  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
+  const [showWalletSelector, setShowWalletSelector] = useState(false);
+  const { className = '' } = props;
+  return (
+    <>
+      <div
+        className={`${className} flex items-center cursor-pointer justify-center rounded-lg py-3 text-base ${
+          buttonLoading ? 'opacity-40' : ''
+        }`}
+        style={{
+          background: 'linear-gradient(180deg, #4B5963 0%, #323C43 100%)',
+          color: '#fff',
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setButtonLoading(true);
+          setShowWalletSelector(true);
+        }}
+      >
+        <button>
+          <ButtonTextWrapper
+            loading={buttonLoading}
+            Text={() => (
+              <FormattedMessage
+                id="connect_to_wallet"
+                defaultMessage="Connect Wallet"
+              />
+            )}
+          />
+        </button>
+      </div>
+      <WalletSelectorModal
+        isOpen={showWalletSelector}
+        onRequestClose={() => {
+          window.location.reload();
+          setShowWalletSelector(false);
+        }}
+        setShowWalletSelector={setShowWalletSelector}
+      />
+    </>
+  );
+}
