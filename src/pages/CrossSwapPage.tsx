@@ -10,7 +10,7 @@ function CrossSwapPage() {
   return (
     <div className="swap">
       <section className="lg:w-560px md:w-5/6 xs:w-full xs:p-2 m-auto relative">
-        <CrossSwapCard allTokens={allTokens} />
+        <CrossSwapCard />
       </section>
     </div>
   );

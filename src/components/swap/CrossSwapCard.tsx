@@ -2,12 +2,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { TokenMetadata } from '../../services/ft-contract';
-import { Pool } from '../../services/pool';
-import ReactModal from 'react-modal';
-import { EstimateSwapView } from '~services/swap';
-import {getCurrentWallet} from "~utils/sender-wallet";
 import {AccountID} from "@aurora-is-near/engine";
+import { wallet } from '~services/near';
 
 const SWAP_IN_KEY = 'REF_FI_SWAP_IN';
 const SWAP_OUT_KEY = 'REF_FI_SWAP_OUT';
@@ -15,52 +11,29 @@ const SWAP_SLIPPAGE_KEY = 'REF_FI_SLIPPAGE_VALUE';
 export const SWAP_USE_NEAR_BALANCE_KEY = 'REF_FI_USE_NEAR_BALANCE_VALUE';
 const TOKEN_URL_SEPARATOR = '|';
 
-export function DoubleCheckModal(
-  props: ReactModal.Props & {
-    pools: Pool[];
-    tokenIn: TokenMetadata;
-    tokenOut: TokenMetadata;
-    from: string;
-    onSwap: (e?: any) => void;
-    swapsTodo: EstimateSwapView[];
-    priceImpactValue: string;
-  }
-) {
+function CrossSwapCard() {
 
   const [address, setAddress] = useState("");
+  function getAccountAddress() {
+    return new AccountID(wallet.getAccountId()).toAddress().toString();
+  }
 
-  const account = getCurrentWallet().wallet.getAccount();
-
-  const accountId = account && account.accountId;
   useEffect(() => {
-    if (accountId) {
-      const address = new AccountID(accountId).toAddress().toString();
-      console.log(address);
-      setAddress(address);
-    }
-  }, [accountId]);
-
-  const onAddressChange = (e: any) => {
-    setAddress(e.target.value);
-  };
+    setAddress(getAccountAddress());
+  }, []);
 
   return (
-    <>
-      <div>
-        <div className="container">
-          <div className="row mb-3">
-            <label htmlFor="eth-address">Aurora address:</label>
-            <input
-                name="eth-address"
-                className="form-control"
-                type="text"
-                placeholder="0x1234..."
-                value={address}
-                onChange={onAddressChange}
-            />
+      <>
+        <div className="py-12">
+          <div className="bg-secondary">
+            <div className="lg:text-center">
+              <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">Address</h2>
+              <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">{address}</p>
+            </div>
           </div>
         </div>
-      </div>
-    </>
+      </>
   );
 }
+
+export default CrossSwapCard;
