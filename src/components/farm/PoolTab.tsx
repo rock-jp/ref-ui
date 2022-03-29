@@ -109,7 +109,11 @@ function PoolDetailMag({
 }
 
 export default function PoolTab(props: any) {
-  const { pool, shares, stakeList } = usePool('5'); // todo
+  const history = useHistory();
+
+  const poolId = history.location.pathname.split('@').at(-1);
+
+  const { pool, shares, stakeList } = usePool(poolId); // todo
   const { detailData, tokenPriceList, hidden } = props;
   const [activeTab, setActiveTab] = useState<string>('add');
   const tokens = useTokens(pool?.tokenIds);
@@ -197,7 +201,6 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
   const balances = useWalletTokenBalances(tokens.map((token) => token.id));
   const [error, setError] = useState<Error>();
   const intl = useIntl();
-  const history = useHistory();
   const [canSubmit, setCanSubmit] = useState<boolean>(false);
   const [canDeposit, setCanDeposit] = useState<boolean>(false);
   const [buttonLoading, setButtonLoading] = useState<boolean>(false);
@@ -697,7 +700,7 @@ export function RemoveLiquidity(props: {
       ) : null}
 
       {error ? (
-        <div className="flex justify-center my-5 text-base">
+        <div className="flex justify-center mb-5 mt-8 text-base">
           <Alert level="warn" message={error.message + '!'} />
         </div>
       ) : null}
