@@ -28,6 +28,7 @@ import { toRealSymbol } from '../utils/token';
 import getConfig from '~services/config';
 import { nearMetadata } from '../services/wrap-near';
 import { Pool } from '../services/pool';
+import { unWrapToken } from '../services/ft-contract';
 import {
   WalletContext,
   getCurrentWallet,
@@ -57,12 +58,14 @@ export const usePoolTokens = (pools: Pool[]) => {
   }, [poolTokensList.length]);
 
   useEffect(() => {
-    if (poolTokensList.length) return;
+    if (poolTokensList.length > 0) return;
     Promise.all(
       pools.map(async (p) => {
         return await Promise.all(
           p.tokenIds.map((id) => {
-            return ftGetTokenMetadata(id);
+            return ftGetTokenMetadata(id).then((meta) => {
+              return unWrapToken(meta, true);
+            });
           })
         );
       })
@@ -185,14 +188,16 @@ export const useWalletTokenBalances = (tokenIds: string[] = []) => {
   const [balances, setBalances] = useState<TokenBalancesView>();
 
   useEffect(() => {
-    Promise.all<string>(tokenIds.map((id) => ftGetBalance(id))).then((res) => {
-      let balances = {};
-      res.map((item, index) => {
-        const tokenId: string = tokenIds[index];
-        balances[tokenId] = item;
-      });
-      setBalances(balances);
-    });
+    Promise.all<string>(tokenIds.map((id) => getDepositableBalance(id))).then(
+      (res) => {
+        let balances = {};
+        res.map((item, index) => {
+          const tokenId: string = tokenIds[index];
+          balances[tokenId] = item;
+        });
+        setBalances(balances);
+      }
+    );
   }, [tokenIds.join('')]);
 
   return balances;

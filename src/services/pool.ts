@@ -11,7 +11,7 @@ import {
 } from './near';
 import BN from 'bn.js';
 import db from '../store/RefDatabase';
-import { ftGetStorageBalance, TokenMetadata } from './ft-contract';
+import { ftGetStorageBalance, TokenMetadata, wrapToken } from './ft-contract';
 import {
   toNonDivisibleNumber,
   toReadableNumber,
@@ -36,6 +36,11 @@ import { withdrawAction } from './creators/token';
 import { getExplorer, ExplorerType } from '../utils/device';
 import { STABLE_POOL_ID, POOL_TOKEN_REFRESH_INTERVAL } from './near';
 import moment from 'moment';
+import {
+  getNearDepositTransaction,
+  WRAP_NEAR_CONTRACT_ID,
+  getNearWithdrawTransaction,
+} from './wrap-near';
 const explorerType = getExplorer();
 
 export const DEFAULT_PAGE_LIMIT = 100;
@@ -379,6 +384,20 @@ export const addLiquidityToPool = async ({
     amounts: tokenAmounts.map(({ token, amount }) => amount),
   });
 
+  if (
+    tokenAmounts.some(({ token, amount }) => {
+      return token.id === WRAP_NEAR_CONTRACT_ID;
+    })
+  ) {
+    const oneTokenWithAmount = tokenAmounts.find(({ token, amount }) => {
+      return token.id === WRAP_NEAR_CONTRACT_ID;
+    });
+
+    depositTransactions.unshift(
+      getNearDepositTransaction(oneTokenWithAmount.amount)
+    );
+  }
+
   const actions: RefFiFunctionCallOptions[] = [
     {
       methodName: 'add_liquidity',
@@ -386,15 +405,6 @@ export const addLiquidityToPool = async ({
       amount: LP_STORAGE_AMOUNT,
     },
   ];
-
-  // const needDeposit = await checkTokenNeedsStorageDeposit();
-  // if (needDeposit) {
-  //   actions.unshift(
-  //     storageDepositAction({
-  //       amount: needDeposit,
-  //     })
-  //   );
-  // }
 
   return executeMultipleTransactions([
     ...depositTransactions,
@@ -563,6 +573,14 @@ export const removeLiquidityFromPool = async ({
       receiverId: REF_FI_CONTRACT_ID,
       functionCalls: withdrawActionsFireFox,
     });
+  }
+
+  if (tokenIds.includes(WRAP_NEAR_CONTRACT_ID)) {
+    transactions.push(
+      getNearWithdrawTransaction(
+        toReadableNumber(24, minimumAmounts[WRAP_NEAR_CONTRACT_ID])
+      )
+    );
   }
 
   return executeMultipleTransactions(transactions);

@@ -92,7 +92,7 @@ import {
   ComposedChart,
 } from 'recharts';
 
-import _ from 'lodash';
+import _, { wrap } from 'lodash';
 import moment from 'moment';
 import { ChartNoData } from '~components/icon/ChartNoData';
 import { WarnTriangle } from '~components/icon/SwapRefresh';
@@ -101,6 +101,8 @@ import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 
 import { useWalletTokenBalances } from '../../state/token';
 import { SmallWallet } from '../../components/icon/SmallWallet';
+import { unWrapToken, wrapToken } from '../../services/ft-contract';
+import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
 interface ParamTypes {
   id: string;
 }
@@ -180,12 +182,15 @@ export function AddLiquidityModal(
     tokens: TokenMetadata[];
   }
 ) {
-  const { pool, tokens } = props;
+  let { pool, tokens } = props;
   const [firstTokenAmount, setFirstTokenAmount] = useState<string>('');
   const [secondTokenAmount, setSecondTokenAmount] = useState<string>('');
   const [messageId, setMessageId] = useState<string>('add_liquidity');
   const [defaultMessage, setDefaultMessage] = useState<string>('Add Liquidity');
-  const balances = useWalletTokenBalances(tokens.map((token) => token.id));
+
+  const balances = useWalletTokenBalances(
+    tokens.map((token) => unWrapToken(token).id)
+  );
   const [error, setError] = useState<Error>();
   const intl = useIntl();
   const history = useHistory();
@@ -202,6 +207,10 @@ export function AddLiquidityModal(
   const { wallet } = getCurrentWallet();
 
   if (!balances) return null;
+
+
+  balances[WRAP_NEAR_CONTRACT_ID] = balances['NEAR']
+
 
   const changeFirstTokenAmount = (amount: string) => {
     setError(null);
@@ -368,11 +377,6 @@ export function AddLiquidityModal(
       setMessageId('add_liquidity');
       setDefaultMessage('Add Liquidity');
       return;
-      // throw new Error(
-      //   `${toRealSymbol(tokens[0].symbol)} ${intl.formatMessage({
-      //     id: 'amount_must_be_greater_than_0',
-      //   })} `
-      // );
     }
 
     if (ONLY_ZEROS.test(secondAmount)) {
@@ -380,11 +384,6 @@ export function AddLiquidityModal(
       setMessageId('add_liquidity');
       setDefaultMessage('Add Liquidity');
       return;
-      // throw new Error(
-      //   `${toRealSymbol(tokens[1].symbol)} ${intl.formatMessage({
-      //     id: 'amount_must_be_greater_than_0',
-      //   })} `
-      // );
     }
 
     if (!tokens[0]) {
@@ -1293,7 +1292,8 @@ export function PoolDetailsPage() {
   const { state } = useLocation<LocationTypes>();
   const { pool, shares, stakeList } = usePool(id);
   const dayVolume = useDayVolume(id);
-  const tokens = useTokens(pool?.tokenIds);
+  let tokens = useTokens(pool?.tokenIds);
+  tokens = tokens?.map((token) => unWrapToken(token, true));
 
   const history = useHistory();
 

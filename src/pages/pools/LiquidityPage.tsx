@@ -54,6 +54,7 @@ import { QuestionTip } from '~components/layout/TipWrapper';
 import { FilterIcon } from '../../components/icon/PoolFilter';
 import useMemo from 'react';
 import { TokenMetadata } from '../../services/ft-contract';
+import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
 
 const HIDE_LOW_TVL = 'REF_FI_HIDE_LOW_TVL';
 
@@ -530,6 +531,7 @@ function PoolRow({
   const [supportFarm, setSupportFarm] = useState<Boolean>(false);
   const [farmCount, setFarmCount] = useState<Number>(1);
   const curRowTokens = useTokens(pool.tokenIds, tokens);
+
   const { ref, inView, entry } = useInView();
   const morePoolIds = useMorePoolIds({ topPool: pool, inView });
   const history = useHistory();
@@ -921,7 +923,12 @@ export function LiquidityPage() {
 
   const onSearch = useCallback(_.debounce(setTokenName, 500), []);
 
-  if (!displayPools || loading || !watchPools || !poolTokenMetas)
+  if (
+    !displayPools ||
+    loading ||
+    !watchPools ||
+    Object.keys(poolTokenMetas).length === 0
+  )
     return <Loading />;
 
   return (

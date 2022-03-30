@@ -7,9 +7,13 @@ import React, {
   useContext,
 } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { ftGetBalance, TokenMetadata } from '../../services/ft-contract';
+import {
+  ftGetBalance,
+  TokenMetadata,
+  wrapToken,
+} from '../../services/ft-contract';
 import { Pool } from '../../services/pool';
-import { useTokenBalances } from '../../state/token';
+import { useTokenBalances, getDepositableBalance } from '../../state/token';
 import { useSwap } from '../../state/swap';
 import {
   calculateExchangeRate,
@@ -631,6 +635,7 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
     Number(localStorage.getItem(SWAP_SLIPPAGE_KEY) || urlSlippageTolerance) ||
       0.5
   );
+
   useEffect(() => {
     const rememberedIn = urlTokenIn || localStorage.getItem(SWAP_IN_KEY);
     const rememberedOut = urlTokenOut || localStorage.getItem(SWAP_OUT_KEY);
@@ -651,7 +656,7 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
         const tokenInId = tokenIn.id;
         if (tokenInId) {
           if (isSignedIn) {
-            ftGetBalance(tokenInId).then((available: string) =>
+            getDepositableBalance(tokenInId).then((available: string) =>
               setTokenInBalanceFromNear(
                 toReadableNumber(tokenIn?.decimals, available)
               )
@@ -663,7 +668,7 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
         const tokenOutId = tokenOut.id;
         if (tokenOutId) {
           if (isSignedIn) {
-            ftGetBalance(tokenOutId).then((available: string) =>
+            getDepositableBalance(tokenOutId).then((available: string) =>
               setTokenOutBalanceFromNear(
                 toReadableNumber(tokenOut?.decimals, available)
               )
@@ -698,7 +703,12 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
 
   const priceImpactValueParallelSwap = useMemo(() => {
     if (!pools || !tokenOutAmount || !tokenInAmount) return '0';
-    return calculatePriceImpact(pools, tokenIn, tokenOut, tokenInAmount);
+    return calculatePriceImpact(
+      pools,
+      wrapToken(tokenIn),
+      wrapToken(tokenOut),
+      tokenInAmount
+    );
   }, [swapsToDo]);
 
   const priceImpactValueSmartRouting = useMemo(() => {
@@ -707,9 +717,9 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
       return calculateSmartRoutingPriceImpact(
         tokenInAmount,
         swapsToDo,
-        tokenIn,
+        wrapToken(tokenIn),
         swapsToDo[1].token,
-        tokenOut
+        wrapToken(tokenOut)
       );
     }
   }, [swapsToDo]);

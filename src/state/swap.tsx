@@ -7,7 +7,11 @@ import {
   EstimateSwapView,
 } from '~services/stable-swap';
 
-import { TokenMetadata } from '../services/ft-contract';
+import {
+  TokenMetadata,
+  ftGetTokenMetadata,
+  wrapToken,
+} from '../services/ft-contract';
 import {
   percentLess,
   scientificNotationToString,
@@ -131,8 +135,8 @@ export const useSwap = ({
       }
 
       estimateSwap({
-        tokenIn,
-        tokenOut,
+        tokenIn: wrapToken(tokenIn),
+        tokenOut: wrapToken(tokenOut),
         amountIn: tokenInAmount,
         intl,
         setLoadingData,

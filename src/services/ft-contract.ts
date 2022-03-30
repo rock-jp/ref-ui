@@ -9,6 +9,12 @@ import metadataDefaults from '../utils/metadata';
 import { storageDepositForFTAction } from './creators/storage';
 import db from '../store/RefDatabase';
 import { getCurrentWallet, WALLET_TYPE } from '../utils/sender-wallet';
+import getConfig from './config';
+import {
+  wnearMetadata,
+  WRAP_NEAR_CONTRACT_ID,
+  nearMetadata,
+} from './wrap-near';
 
 export const NEAR_ICON =
   'https://near.org/wp-content/themes/near-19/assets/img/brand-icon.png';
@@ -16,6 +22,24 @@ const BANANA_ID = 'berryclub.ek.near';
 const CHEDDAR_ID = 'token.cheddar.near';
 const CUCUMBER_ID = 'farm.berryclub.ek.near';
 const HAPI_ID = 'd9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near';
+
+export const isWNear = (id: string) =>
+  id === 'wrap.testnet' || id === 'wrap.near';
+
+export const wrapToken = (token: TokenMetadata, keepId?: boolean) => {
+  if (token.id !== 'NEAR') return token;
+  else
+    return {
+      ...wnearMetadata,
+      id: keepId ? token.id : wnearMetadata.id,
+    };
+};
+
+export const unWrapToken = (token: TokenMetadata, keepId?: boolean) => {
+  if (token.id === getConfig().WRAP_NEAR_CONTRACT_ID)
+    return { ...nearMetadata, id: keepId ? token.id : nearMetadata.id };
+  else return token;
+};
 
 export const ftFunctionCall = (
   tokenId: string,

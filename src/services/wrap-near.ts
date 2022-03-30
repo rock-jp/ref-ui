@@ -20,7 +20,7 @@ export const NEW_ACCOUNT_STORAGE_COST = '0.00125';
 
 export const wnearMetadata: TokenMetadata = {
   id: WRAP_NEAR_CONTRACT_ID,
-  name: 'wNEAR',
+  name: 'Wrapped NEAR fungible token',
   symbol: 'wNEAR',
   decimals: 24,
   icon: 'https://i.postimg.cc/DZfHgngm/w-NEAR-no-border.png',
@@ -34,7 +34,23 @@ export const nearMetadata: TokenMetadata = {
   icon: 'https://near.org/wp-content/themes/near-19/assets/img/brand-icon.png',
 };
 
+export const getNearDepositTransaction = (amount: string): Transaction => {
+  return {
+    receiverId: WRAP_NEAR_CONTRACT_ID,
+    functionCalls: [
+      {
+        methodName: 'near_deposit',
+        args: {},
+        gas: '50000000000000',
+        amount,
+      },
+    ],
+  };
+};
+
 export const nearDeposit = async (amount: string) => {
+  console.log(amount);
+
   const transactions: Transaction[] = [
     {
       receiverId: WRAP_NEAR_CONTRACT_ID,
@@ -50,6 +66,19 @@ export const nearDeposit = async (amount: string) => {
   ];
 
   return executeMultipleTransactions(transactions);
+};
+
+export const getNearWithdrawTransaction = (amount: string): Transaction => {
+  return {
+    receiverId: WRAP_NEAR_CONTRACT_ID,
+    functionCalls: [
+      {
+        methodName: 'near_withdraw',
+        args: { amount: utils.format.parseNearAmount(amount) },
+        amount: ONE_YOCTO_NEAR,
+      },
+    ],
+  };
 };
 
 export const nearWithdraw = async (amount: string) => {

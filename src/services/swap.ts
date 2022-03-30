@@ -62,6 +62,11 @@ import _, { filter } from 'lodash';
 import { getSwappedAmount } from './stable-swap';
 import { STABLE_LP_TOKEN_DECIMALS } from '~components/stableswap/AddLiquidity';
 import { getCurrentWallet } from '../utils/sender-wallet';
+import {
+  getNearDepositTransaction,
+  getNearWithdrawTransaction,
+} from './wrap-near';
+import { wrapToken, unWrapToken } from './ft-contract';
 
 // Big.strict = false;
 const FEE_DIVISOR = 10000;
@@ -460,8 +465,8 @@ export const swap = async ({
 };
 
 export const instantSwap = async ({
-  tokenIn,
-  tokenOut,
+  tokenIn: rawTokenIn,
+  tokenOut: rawTokenOut,
   amountIn,
   swapsToDo,
   slippageTolerance,
@@ -472,6 +477,9 @@ SwapOptions) => {
   const tokenOutActions: RefFiFunctionCallOptions[] = [];
 
   const { wallet, wallet_type } = getCurrentWallet();
+
+  const tokenIn = wrapToken(rawTokenIn);
+  const tokenOut = wrapToken(rawTokenOut);
 
   const registerToken = async (token: TokenMetadata) => {
     const tokenRegistered = await ftGetStorageBalance(token.id).catch(() => {
@@ -495,6 +503,7 @@ SwapOptions) => {
       });
     }
   };
+  await registerToken(tokenOut);
 
   const isParallelSwap = swapsToDo.every(
     (estimate) => estimate.status === PoolMode.PARALLEL
@@ -540,8 +549,6 @@ SwapOptions) => {
         };
       });
 
-      await registerToken(tokenOut);
-
       tokenInActions.push({
         methodName: 'ft_transfer_call',
         args: {
@@ -561,12 +568,8 @@ SwapOptions) => {
         receiverId: tokenIn.id,
         functionCalls: tokenInActions,
       });
-
-      return executeMultipleTransactions(transactions);
     } else {
       const tokenMid = swapsToDo[1].token;
-
-      await registerToken(tokenOut);
 
       transactions.push({
         receiverId: tokenIn.id,
@@ -609,10 +612,22 @@ SwapOptions) => {
           },
         ],
       });
-
-      return executeMultipleTransactions(transactions);
     }
   }
+
+  if (rawTokenIn.id === 'NEAR') {
+    transactions.unshift(getNearDepositTransaction(amountIn));
+  }
+
+  if (rawTokenOut.id === 'NEAR') {
+    transactions.push(
+      getNearWithdrawTransaction(
+        percentLess(slippageTolerance, swapsToDo[swapsToDo.length - 1].estimate)
+      )
+    );
+  }
+
+  return executeMultipleTransactions(transactions);
 };
 
 export const depositSwap = async ({
