@@ -62,6 +62,7 @@ import { PoolDetail } from './PoolDetail';
 import { divide, scientificNotationToString } from '../../utils/numbers';
 import { NewFarmPoolSlippageSelector } from '../forms/SlippageSelector';
 import { Icon } from '../../pages/pools/DetailsPage';
+import { StableSwapLogo } from '~components/icon/StableSwap';
 import {
   useMonthTVL,
   useMonthVolume,
@@ -85,7 +86,7 @@ function PoolDetailMag({
 }: {
   showReserves: boolean;
   setShowReserves: (e?: any) => void;
-  hidden: boolean;
+  hidden?: boolean;
 }) {
   return (
     <span
@@ -128,11 +129,37 @@ export default function PoolTab(props: any) {
   const [showReserves, setShowReserves] = useState(false);
 
   if (!(tokens && tokens.length > 0 && pool)) return null;
+
   return (
-    <>
+    <div className={hidden ? 'hidden' : ''}>
       <div
-        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 pt-3 pb-16 ${
-          hidden ? 'hidden' : ''
+        className={` ${
+          poolId !== STABLE_POOL_ID ? 'hidden' : 'block'
+        } flex flex-col items-center justify-center mt-20 `}
+      >
+        <StableSwapLogo />
+        <span className="text-sm text-farmText mt-4">
+          <FormattedMessage id="go_to" defaultMessage="Go to" />{' '}
+          <span
+            className="text-gradientFrom border-b border-gradientFrom border-opacity-70 cursor-pointer"
+            onClick={() => {
+              history.push('/stableswap', { stableTab: 'add_liquidity' });
+            }}
+          >
+            [
+            <FormattedMessage id="sauce" defaultMessage="Sauce" />]
+          </span>{' '}
+          <FormattedMessage
+            id="stable_pool_to_add_liquidity_now"
+            defaultMessage="stable pool to add liquidity now"
+          />
+          .
+        </span>
+      </div>
+
+      <div
+        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 xs:px-6 pt-3 pb-16 ${
+          hidden || poolId === STABLE_POOL_ID ? 'hidden' : ''
         }`}
       >
         <div className="tab relative flex mb-7">
@@ -140,11 +167,13 @@ export default function PoolTab(props: any) {
             onClick={() => {
               switchTab('add');
             }}
-            className={`flex relative items-center w-1/2 text-lg py-3.5  pl-20 cursor-pointer ${
+            className={`flex relative items-center w-1/2 text-lg py-3.5 justify-center cursor-pointer ${
               activeTab == 'add' ? 'text-white' : 'text-primaryText'
             }`}
           >
-            <FormattedMessage id="add_liquidity" />
+            <span>
+              <FormattedMessage id="add_liquidity" />
+            </span>
             <div
               className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
                 activeTab == 'add' ? 'bg-greenColor' : ''
@@ -155,11 +184,13 @@ export default function PoolTab(props: any) {
             onClick={() => {
               switchTab('remove');
             }}
-            className={`flex relative items-center w-1/2  text-lg py-3.5 pl-20 cursor-pointer ${
+            className={`flex relative items-center w-1/2  text-lg py-3.5 cursor-pointer justify-center ${
               activeTab == 'remove' ? 'text-white' : 'text-primaryText'
             }`}
           >
-            <FormattedMessage id="remove"></FormattedMessage>
+            <span>
+              <FormattedMessage id="remove" />
+            </span>
             <div
               className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
                 activeTab == 'remove' ? 'bg-greenColor' : ''
@@ -188,11 +219,11 @@ export default function PoolTab(props: any) {
       <PoolDetailMag
         showReserves={showReserves}
         setShowReserves={setShowReserves}
-        hidden={hidden}
+        hidden={poolId === STABLE_POOL_ID}
       />
 
       <PoolDetail pool={pool} showDetail={showReserves} />
-    </>
+    </div>
   );
 }
 export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
@@ -565,16 +596,14 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         </span>
       </div>
       {canDeposit ? (
-        <div className="flex xs:flex-col md:flex-col justify-between items-center rounded-md mb-6 py-3 px-4 border border-warnColor">
-          <div className="flex items-center xs:mb-3 md:mb-3">
-            <label className="text-base text-warnColor xs:text-sm md:text-sm">
-              <FormattedMessage id="oops" defaultMessage="Oops" />!
-            </label>
-            <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
-              <FormattedMessage id="you_do_not_have_enough" />{' '}
-              {modal?.token?.symbol}.
-            </label>
-          </div>
+        <div className="flex items-center rounded-md mb-6 py-3 px-4 xs:px-2 border border-warnColor">
+          <label className="text-base text-warnColor xs:text-sm md:text-sm">
+            <FormattedMessage id="oops" defaultMessage="Oops" />!
+          </label>
+          <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
+            <FormattedMessage id="you_do_not_have_enough" />{' '}
+            {modal?.token?.symbol}.
+          </label>
         </div>
       ) : null}
 

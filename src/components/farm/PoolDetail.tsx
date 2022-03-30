@@ -637,8 +637,10 @@ export function PoolDetail({
       pool.supplies[token.id]
     );
 
-    const displayTitle =
-      Number(tokenSupply) < 0.01 ? '< 0.01' : toPrecision(tokenSupply, 0);
+    const displayTokenSupply =
+      Number(tokenSupply) < 0.01 && Number(tokenSupply) > 0
+        ? '< 0.01'
+        : toInternationalCurrencySystem(tokenSupply);
 
     return (
       <div className="bg-black bg-opacity-20 rounded-lg px-5 py-2 flex items-center justify-between text-sm">
@@ -649,8 +651,8 @@ export function PoolDetail({
           </span>
         </div>
 
-        <span className="text-white text-base" title={displayTitle}>
-          {toInternationalCurrencySystem(tokenSupply)}
+        <span className="text-white text-base" title={tokenSupply}>
+          {displayTokenSupply}
         </span>
       </div>
     );
@@ -679,18 +681,18 @@ export function PoolDetail({
   return (
     <Card
       padding="px-6 pt-8 pb-6"
-      width="w-580px"
+      width="w-full"
       className={`mx-auto flex flex-col relative bottom-10 ${
         showDetail ? 'block' : 'hidden'
       }`}
     >
       <Header />
 
-      <div className="flex items-center justify-between w-full">
-        <div className="mr-2 w-full">
+      <div className="flex xs:flex-col items-center justify-between w-full">
+        <div className="mr-2 xs:mr-0 w-full">
           <PoolTokenInfo token={tokens?.[pool.tokenIds[0]]} pool={pool} />
         </div>
-        <div className="ml-2 w-full">
+        <div className="ml-2 xs:ml-0 xs:mt-2 w-full">
           <PoolTokenInfo token={tokens?.[pool.tokenIds[1]]} pool={pool} />
         </div>
       </div>
