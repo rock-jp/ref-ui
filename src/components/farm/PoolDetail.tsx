@@ -637,8 +637,6 @@ export function PoolDetail({
       pool.supplies[token.id]
     );
 
-    const displayTitle = toPrecision(tokenSupply, 0);
-
     const displayTokenSupply =
       Number(tokenSupply) < 0.01 && Number(tokenSupply) > 0
         ? '< 0.01'
@@ -653,7 +651,7 @@ export function PoolDetail({
           </span>
         </div>
 
-        <span className="text-white text-base" title={displayTitle}>
+        <span className="text-white text-base" title={tokenSupply}>
           {displayTokenSupply}
         </span>
       </div>
