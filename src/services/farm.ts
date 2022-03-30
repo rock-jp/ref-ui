@@ -90,6 +90,7 @@ export interface extendType {
   totalApr?: number;
   default?: string;
   multiple?: string;
+  front?: string;
 }
 export interface cdStrategy {
   enable: boolean;
@@ -711,4 +712,7 @@ export const defaultConfig = {
   '3': '4',
   '2734': '4',
   '974': '4',
+};
+export const frontConfig = {
+  '79': '98',
 };

@@ -398,5 +398,6 @@ const en_US = {
   free: 'Free',
   lp_tokens: 'LP tokens',
   connect_to_wallet: 'Connect Wallet',
+  start: 'Start',
 };
 export default en_US;

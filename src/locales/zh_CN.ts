@@ -383,5 +383,6 @@ const zh_CN = {
   free: '活期',
   lp_tokens: 'LP tokens',
   connect_to_wallet: '连接钱包',
+  start: '开始',
 };
 export default zh_CN;
