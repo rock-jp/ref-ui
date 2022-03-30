@@ -62,6 +62,7 @@ import { PoolDetail } from './PoolDetail';
 import { divide, scientificNotationToString } from '../../utils/numbers';
 import { NewFarmPoolSlippageSelector } from '../forms/SlippageSelector';
 import { Icon } from '../../pages/pools/DetailsPage';
+import { StableSwapLogo } from '~components/icon/StableSwap';
 import {
   useMonthTVL,
   useMonthVolume,
@@ -81,15 +82,17 @@ const REF_NEW_FARMING_POOL_TAB_KEY = 'REF_NEW_FARMING_POOL_TAB_VALUE';
 function PoolDetailMag({
   showReserves,
   setShowReserves,
+  hidden,
 }: {
   showReserves: boolean;
   setShowReserves: (e?: any) => void;
+  hidden?: boolean;
 }) {
   return (
     <span
       className={`px-5 rounded-t-xl text-sm text-farmText mx-auto flex items-center justify-center cursor-pointer bg-cardBg pt-3 relative bottom-10 ${
         showReserves ? 'pb-5' : 'pb-1.5'
-      }`}
+      } ${hidden ? 'hidden' : ''}`}
       style={{
         borderTop: '1px solid #415462',
         width: '175px',
@@ -126,11 +129,37 @@ export default function PoolTab(props: any) {
   const [showReserves, setShowReserves] = useState(false);
 
   if (!(tokens && tokens.length > 0 && pool)) return null;
+
   return (
     <>
       <div
+        className={` ${
+          poolId !== STABLE_POOL_ID ? 'hidden' : 'block'
+        } flex flex-col items-center justify-center mt-20 `}
+      >
+        <StableSwapLogo />
+        <span className="text-sm text-farmText mt-4">
+          <FormattedMessage id="go_to" defaultMessage="Go to" />{' '}
+          <span
+            className="text-gradientFrom border-b border-gradientFrom border-opacity-70 cursor-pointer"
+            onClick={() => {
+              history.push('/stableswap', { stableTab: 'add_liquidity' });
+            }}
+          >
+            [
+            <FormattedMessage id="sauce" defaultMessage="Sauce" />]
+          </span>{' '}
+          <FormattedMessage
+            id="stable_pool_to_add_liquidity_now"
+            defaultMessage="stable pool to add liquidity now"
+          />
+          .
+        </span>
+      </div>
+
+      <div
         className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 pt-3 pb-16 ${
-          hidden ? 'hidden' : ''
+          hidden || poolId === STABLE_POOL_ID ? 'hidden' : ''
         }`}
       >
         <div className="tab relative flex mb-7">
@@ -186,6 +215,7 @@ export default function PoolTab(props: any) {
       <PoolDetailMag
         showReserves={showReserves}
         setShowReserves={setShowReserves}
+        hidden={poolId === STABLE_POOL_ID}
       />
 
       <PoolDetail pool={pool} showDetail={showReserves} />
