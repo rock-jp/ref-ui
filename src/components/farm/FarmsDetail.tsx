@@ -102,7 +102,7 @@ export default function FarmsDetail(props: any) {
       <div className="pairTab flex justify-between items-center mt-7">
         <div className="left flex items-center h-11 ml-3">
           <span className="flex">{displayImgs()}</span>
-          <span className="flex items-center cursor-pointer text-white font-bold text-2xl ml-4">
+          <span className="flex items-center cursor-pointer text-white font-bold text-xl ml-4">
             {displaySymbols()}
           </span>
         </div>
