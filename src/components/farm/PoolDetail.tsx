@@ -637,8 +637,12 @@ export function PoolDetail({
       pool.supplies[token.id]
     );
 
-    const displayTitle =
-      Number(tokenSupply) < 0.01 ? '< 0.01' : toPrecision(tokenSupply, 0);
+    const displayTitle = toPrecision(tokenSupply, 0);
+
+    const displayTokenSupply =
+      Number(tokenSupply) < 0.01 && Number(tokenSupply) > 0
+        ? '< 0.01'
+        : toInternationalCurrencySystem(tokenSupply);
 
     return (
       <div className="bg-black bg-opacity-20 rounded-lg px-5 py-2 flex items-center justify-between text-sm">
@@ -650,7 +654,7 @@ export function PoolDetail({
         </div>
 
         <span className="text-white text-base" title={displayTitle}>
-          {toInternationalCurrencySystem(tokenSupply)}
+          {displayTokenSupply}
         </span>
       </div>
     );
