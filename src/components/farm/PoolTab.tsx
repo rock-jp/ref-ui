@@ -81,15 +81,17 @@ const REF_NEW_FARMING_POOL_TAB_KEY = 'REF_NEW_FARMING_POOL_TAB_VALUE';
 function PoolDetailMag({
   showReserves,
   setShowReserves,
+  hidden,
 }: {
   showReserves: boolean;
   setShowReserves: (e?: any) => void;
+  hidden: boolean;
 }) {
   return (
     <span
       className={`px-5 rounded-t-xl text-sm text-farmText mx-auto flex items-center justify-center cursor-pointer bg-cardBg pt-3 relative bottom-10 ${
         showReserves ? 'pb-5' : 'pb-1.5'
-      }`}
+      } ${hidden ? 'hidden' : ''}`}
       style={{
         borderTop: '1px solid #415462',
         width: '175px',
@@ -186,6 +188,7 @@ export default function PoolTab(props: any) {
       <PoolDetailMag
         showReserves={showReserves}
         setShowReserves={setShowReserves}
+        hidden={hidden}
       />
 
       <PoolDetail pool={pool} showDetail={showReserves} />

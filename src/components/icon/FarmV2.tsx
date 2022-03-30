@@ -1245,7 +1245,7 @@ export const SnakeImgLong = function (props: any) {
   return (
     <svg
       {...props}
-      width="502"
+      width="100"
       height="62"
       viewBox="0 0 100% 62"
       fill="none"
@@ -1258,7 +1258,7 @@ export const SnakeImgLong = function (props: any) {
         height="20"
         rx="10"
         fill="black"
-        fill-opacity="0.2"
+        fillOpacity="0.2"
         stroke="#00D6AF"
       />
       <path
@@ -1266,8 +1266,8 @@ export const SnakeImgLong = function (props: any) {
         fill="white"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M473.75 36.5086L477.5 33.25L477.5 34.9166L473.75 38.25L470 34.9166L470 33.25L473.75 36.5086Z"
         fill="white"
       />
@@ -1293,7 +1293,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="232"
@@ -1302,7 +1302,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="259"
@@ -1311,7 +1311,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="259"
@@ -1320,7 +1320,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="286"
@@ -1329,7 +1329,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="286"
@@ -1338,7 +1338,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="313"
@@ -1347,7 +1347,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="313"
@@ -1356,7 +1356,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="340"
@@ -1365,7 +1365,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="340"
@@ -1374,7 +1374,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="367"
@@ -1383,7 +1383,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="367"
@@ -1392,7 +1392,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="394"
@@ -1401,7 +1401,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="394"
@@ -1410,7 +1410,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="421"
@@ -1419,7 +1419,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="421"
@@ -1428,7 +1428,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="448"
@@ -1437,7 +1437,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="448"
@@ -1446,7 +1446,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="475"
@@ -1455,7 +1455,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <rect
         x="475"
@@ -1464,7 +1464,7 @@ export const SnakeImgLong = function (props: any) {
         height="23"
         rx="8"
         fill="#C4C4C4"
-        fill-opacity="0.03"
+        fillOpacity="0.03"
       />
       <circle cx="189.5" cy="41.5" r="9.5" fill="#0025FF" />
       <circle cx="327.5" cy="13.5" r="9.5" fill="#AD00FF" />
@@ -1537,9 +1537,9 @@ export const SnakeImgLong = function (props: any) {
           width="148"
           height="28"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -1572,9 +1572,9 @@ export const SnakeImgLong = function (props: any) {
           width="42.6142"
           height="55"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -1607,9 +1607,9 @@ export const SnakeImgLong = function (props: any) {
           width="69.3135"
           height="38.75"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -1642,9 +1642,9 @@ export const SnakeImgLong = function (props: any) {
           width="69.3135"
           height="27.75"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -1677,9 +1677,9 @@ export const SnakeImgLong = function (props: any) {
           width="34.9254"
           height="34.9258"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
-          <feFlood flood-opacity="0" result="BackgroundImageFix" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"

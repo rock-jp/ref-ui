@@ -399,5 +399,15 @@ const en_US = {
   lp_tokens: 'LP tokens',
   connect_to_wallet: 'Connect Wallet',
   start: 'Start',
+  anytime: 'Anytime',
+  slash_policy_content:
+    'Each seed has its own slash rate. And it will decreases linearly over time until be 0 at the unlock time of this CD Account.',
+  not_expired: 'Not expired',
+  accept_pay_slash_tip: 'I accept to pay slash, read slash policy',
+  you_will_pay: 'You will pay',
+  lp_token_slash: 'LP token Slash',
+  booster_change_reason: 'Booster will change due to appending time',
+  initial_booster: 'Initial Booster',
+  append_timing: 'Append timing',
 };
 export default en_US;

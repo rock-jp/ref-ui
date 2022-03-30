@@ -179,10 +179,13 @@ export default function StakeTab(props: any) {
 }
 function SlashTip(props: any) {
   const { isHiddenText } = props;
+  const intl = useIntl();
+  const text1 = intl.formatMessage({ id: 'slash_policy' });
+  const text2 = intl.formatMessage({ id: 'slash_policy_content' });
   const slash_policy_tip = () => {
     const result = `<div class='w-52 text-xs text-primaryText text-left'>
-    <p>Slash Policy:</p>
-    <p>Each seed has its own slash rate. And it will decreases linearly over time until be 0 at the unlock time of this CD Account.</p>
+    <p>${text1}:</p>
+    <p>${text2}</p>
  </div>`;
     return result;
   };
@@ -464,12 +467,14 @@ function StakeArea(props: any) {
               </span>
             </div>
           </div>
-          <div className="flex items-center mt-16 mb-12 pr-5">
+          <div className="flex items-center mt-16 mb-12 pr-5 ml-5">
             {cd_strategy?.map((item: any, index: number) => {
               return (
                 <div
                   key={index}
-                  className={`flex items-center relative w-1/${cd_strategy.length}`}
+                  className={`flex items-center relative ${
+                    index == 0 ? 'w-0' : 'w-1/' + (cd_strategy.length - 1)
+                  }`}
                 >
                   <div
                     style={{ height: '5px' }}
@@ -483,7 +488,7 @@ function StakeArea(props: any) {
                     className={`absolute right-0 flex flex-col items-center transform translate-x-1/2 z-10`}
                   >
                     <label
-                      className={`text-white text-sm h-5 ${
+                      className={`text-white text-sm h-5 whitespace-nowrap ${
                         selected_cd_strategy?.index == item.index
                           ? 'visible'
                           : 'invisible'
@@ -503,7 +508,7 @@ function StakeArea(props: any) {
                       } `}
                     ></span>
                     <label
-                      className={`text-sm ${
+                      className={`text-sm whitespace-nowrap ${
                         index > 0 ? 'text-farmText' : 'text-white'
                       }`}
                     >
@@ -575,6 +580,7 @@ function StakedList(props: any) {
   const seedId = detailData[0]['seed_id'];
   const pool = detailData[0]['pool'];
   const farm = detailData[0];
+  const intl = useIntl();
   useEffect(() => {
     getUserSeedInfoBySeedId();
     getUnclaimedRewardData();
@@ -794,6 +800,9 @@ function StakedList(props: any) {
     setAppendStakeModalVisible(false);
     setAppendAccount(null);
   };
+  const booster_change_reason = intl.formatMessage({
+    id: 'booster_change_reason',
+  });
   return (
     <div
       className={`stakedBox relative bg-cardBg  px-7 py-3 ${
@@ -918,9 +927,7 @@ function StakedList(props: any) {
                   data-for="booster_id"
                   data-place="top"
                   data-html={true}
-                  data-tip={
-                    '<div class="w-40 text-farmText text-xs text-left">Booster will change due to appending time</div>'
-                  }
+                  data-tip={`<div class="w-40 text-farmText text-xs text-left">${booster_change_reason}</div>`}
                 >
                   <QuestionMark></QuestionMark>
                   <ReactTooltip
@@ -1077,6 +1084,7 @@ function AppendStakeModal(props: any) {
   const [error, setError] = useState<Error>();
   const { detailData, account, cd_strategy } = props;
   const pool = detailData[0].pool;
+  const intl = useIntl();
   const changeAmount = (amount: string) => {
     const LIMITAOMUNT = '1000000000000000000';
     let value;
@@ -1177,7 +1185,8 @@ function AppendStakeModal(props: any) {
         <>
           <label className="text-white text-lg">x {displayRealRate}</label>
           <span className="rounded-2xl bg-black bg-opacity-20 text-farmText text-sm px-3 py-1.5 mt-1.5">
-            Initial Booster {initial_rate} x Append timing{' '}
+            <FormattedMessage id="initial_booster" /> {initial_rate} x{' '}
+            <FormattedMessage id="append_timing" />{' '}
             {toPrecision(percent_time, 2)}
           </span>
         </>
@@ -1186,7 +1195,7 @@ function AppendStakeModal(props: any) {
     return result;
   }
   function displayTime() {
-    let result = 'Anytime';
+    let result = intl.formatMessage({ id: 'anytime' });
     const { isFree } = account;
     if (!isFree) {
       const { end_sec } = account;
@@ -1429,6 +1438,7 @@ function UnStakeModal(props: any) {
   const [status, setStatus] = useState<string | number>();
   const pool = detailData[0].pool;
   const seedId = detailData[0]['seed_id'];
+  const intl = useIntl();
   useEffect(() => {
     if (!account.isFree) {
       getCdInfo();
@@ -1472,10 +1482,11 @@ function UnStakeModal(props: any) {
     return result;
   };
   const displayLastTime = () => {
-    let result = 'AnyTime';
+    const txt = intl.formatMessage({ id: 'anytime' });
+    let result = '';
     const { isFree, end_sec } = account;
-    if (!isFree) {
-      result = 'AnyTime';
+    if (isFree) {
+      result = txt;
     }
     if (!isFree && serverTime) {
       const endLineArr = (new Date(end_sec * 1000).toString() || '').split(' ');
@@ -1491,13 +1502,14 @@ function UnStakeModal(props: any) {
     return v;
   };
   const displayStatus = () => {
+    const txt = intl.formatMessage({ id: 'not_expired' });
     let result: any = '-';
     switch (+status) {
       case 1:
         result = 'Free';
         break;
       case 2:
-        result = <label className="text-redwarningColor">Not expired</label>;
+        result = <label className="text-redwarningColor">{txt}</label>;
         break;
       case 3:
         result = 'expired';
@@ -1671,7 +1683,9 @@ function UnStakeModal(props: any) {
           <div className="flex items-center justify-center rounded-md border border-redwarningColor py-4 px-2 mt-6">
             <ErrorTriangle></ErrorTriangle>
             <label className="text-base text-redwarningColor ml-3">
-              You will pay {get_slash_lp_amount().payAmout} LP token Slash.
+              <FormattedMessage id="you_will_pay" />{' '}
+              {get_slash_lp_amount().payAmout}{' '}
+              <FormattedMessage id="lp_token_slash" />.
             </label>
           </div>
         </>
@@ -1709,7 +1723,7 @@ function UnStakeModal(props: any) {
             )}
           </span>
           <label className="text-farmText text-sm">
-            I accept to pay slash, read slash policy
+            <FormattedMessage id="accept_pay_slash_tip"></FormattedMessage>
           </label>
           <SlashTip isHiddenText={true}></SlashTip>
         </div>
@@ -1753,7 +1767,7 @@ function CommonLine(props: any) {
   const { title, ...rest } = props;
   return (
     <div {...rest} className={`flex justify-between mt-4 items-center `}>
-      <label className="text-farmText text-sm">
+      <label className="text-farmText text-sm whitespace-nowrap">
         <FormattedMessage id={title}></FormattedMessage>
       </label>
       {props.children}

@@ -270,30 +270,13 @@ export function CalcEle(props: {
 }) {
   const { farms, tokenPriceList, lpTokenNumAmount, usd } = props;
   const intl = useIntl();
-  const [selecteDate, setSelecteDate] = useState('day_2');
+  const [selecteDate, setSelecteDate] = useState<Record<string, any>>({});
   const [totalApr, setTotalApr] = useState('');
   const [rewardData, setRewardData] = useState<Record<string, any>>({});
   let [lpTokenNum, setLpTokenNum] = useState(lpTokenNumAmount);
-  const freeDayList = {
-    day_1: {
-      v: intl.formatMessage({ id: 'day_1' }),
-      day: '1',
-    },
-    day_2: {
-      v: intl.formatMessage({ id: 'day_2' }),
-      day: '7',
-    },
-    day_3: {
-      v: intl.formatMessage({ id: 'day_3' }),
-      day: '30',
-    },
-    day_4: {
-      v: intl.formatMessage({ id: 'day_4' }),
-      day: '90',
-    },
-  };
-  const [dateList, setDateList] = useState(freeDayList);
+  const [dateList, setDateList] = useState<Record<string, any>>({});
   const [cdDateList, setCdDateList] = useState(null);
+  const [freeDateList, setFreeDateList] = useState(null);
   const [accountType, setAccountType] = useState('free');
   const pool = farms[0].pool;
   useEffect(() => {
@@ -301,7 +284,7 @@ export function CalcEle(props: {
   }, []);
   useEffect(() => {
     if (accountType == 'cd') {
-      const rate = cdDateList[selecteDate].rate;
+      const rate = cdDateList[selecteDate.id].rate;
       const power = new BigNumber(rate)
         .multipliedBy(+lpTokenNumAmount)
         .toFixed();
@@ -327,7 +310,7 @@ export function CalcEle(props: {
         const totalStake = new BigNumber(lpTokenNum)
           .plus(seedAmount)
           .toString();
-        const day = dateList[selecteDate].day;
+        const day = dateList[selecteDate.id].day;
         const perDayAndLp = new BigNumber(rewardsPerWeek).dividedBy(
           new BigNumber(totalStake).multipliedBy(7)
         );
@@ -414,9 +397,8 @@ export function CalcEle(props: {
     }
   }, [lpTokenNumAmount, selecteDate, accountType]);
 
-  function changeDate(e: any) {
-    const dateId = e.currentTarget.dataset.id;
-    setSelecteDate(dateId);
+  function changeDate(v: any) {
+    setSelecteDate(v);
   }
   function getMyShare() {
     if (!lpTokenNum || new BigNumber(lpTokenNum).isEqualTo('0')) {
@@ -452,29 +434,49 @@ export function CalcEle(props: {
   const get_cd_strategy_list = async () => {
     const { stake_strategy = [] } = await get_cd_strategy();
     const map = {};
+    const freeMap = {
+      day_1: {
+        id: 'day_1',
+        v: intl.formatMessage({ id: 'day_1' }),
+        day: 1,
+        rate: 1,
+      },
+    };
     stake_strategy.filter((item: cdStrategy, index: number) => {
       if (item.enable) {
+        // todo
         const days = item.lock_sec / (24 * 60 * 60);
+        const month = days / 30;
         const rate = item.power_reward_rate / 10000 + 1;
-        map['day_' + (index + 5)] = {
-          v: `${days}D`,
+        map['day_' + (index + 10)] = {
+          id: 'day_' + (index + 10),
+          v: `${month}M`,
           day: `${days}`,
           rate,
+        };
+        freeMap['day_' + (index + 2)] = {
+          id: 'day_' + (index + 2),
+          v: `${month}M`,
+          day: `${days}`,
+          rate: 1,
         };
         return true;
       }
     });
+    setFreeDateList(freeMap);
     setCdDateList(map);
+    setDateList(freeMap);
+    setSelecteDate(freeMap[Object.keys(freeMap)[1]]);
   };
   function switchAccountType(type: string) {
     if (type == 'free') {
-      setDateList(freeDayList);
+      setDateList(freeDateList);
       setAccountType('free');
-      setSelecteDate('day_2');
+      setSelecteDate(freeDateList[Object.keys(freeDateList)[1]]);
     } else if (type == 'cd' && cdDateList) {
       setDateList(cdDateList);
       setAccountType('cd');
-      setSelecteDate(Object.keys(cdDateList)[0]);
+      setSelecteDate(cdDateList[Object.keys(cdDateList)[0]]);
     }
   }
   return (
@@ -512,26 +514,34 @@ export function CalcEle(props: {
           </div>
         </div>
         <div className="flex items-center bg-datebg bg-opacity-40 rounded-md h-7 xs:h-6 md:h-6 mt-5">
-          {Object.entries(dateList).map(([id, { v }]) => {
+          {Object.entries(dateList).map(([id, v]) => {
             return (
               <label
-                onClick={changeDate}
+                onClick={() => {
+                  changeDate(v);
+                }}
                 data-id={id}
                 className={
                   'flex items-center justify-center flex-grow text-sm rounded-md cursor-pointer h-full ' +
-                  (selecteDate == id
+                  (selecteDate.id == id
                     ? 'bg-gradientFromHover text-chartBg'
                     : 'text-farmText')
                 }
                 key={id}
               >
-                {v}
+                {v.v}
               </label>
             );
           })}
         </div>
+        <div className="flex justify-between items-center mt-4">
+          <label className="text-sm text-farmText">
+            <FormattedMessage id="booster"></FormattedMessage>
+          </label>
+          <label className="text-sm text-farmText">x {selecteDate.rate}</label>
+        </div>
       </div>
-      <div className="mt-7 xs:mt-4 md:mt-4">
+      <div className="mt-2">
         <div className="flex justify-between">
           <label className="text-sm text-farmText">
             <FormattedMessage id="cur_apr"></FormattedMessage>
