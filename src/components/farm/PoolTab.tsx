@@ -50,7 +50,7 @@ import { Checkbox, CheckboxSelected } from '~components/icon';
 import { ErrorTriangle } from '~components/icon/SwapRefresh';
 import { ftGetTokenMetadata, TokenMetadata } from '../../services/ft-contract';
 import { useTokens, getDepositableBalance } from '~state/token';
-import { e } from 'mathjs';
+import math, { e } from 'mathjs';
 import { useWalletTokenBalances } from '../../state/token';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 import { isMobile } from '~utils/device';
@@ -470,7 +470,11 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
     if (result !== '-') {
       percentShare = `${percent(
         preShare,
-        toReadableNumber(24, pool.shareSupply)
+        scientificNotationToString(
+          new BigNumber(toReadableNumber(24, pool.shareSupply))
+            .plus(new BigNumber(preShare))
+            .toString()
+        )
       )}`;
 
       if (Number(percentShare) > 0 && Number(percentShare) < 0.01) {
@@ -666,7 +670,7 @@ export function RemoveLiquidity(props: {
         />
       </div>
 
-      {amount && Number(pool.shareSupply) != 0 ? (
+      {!ONLY_ZEROS.test(amount) && Number(pool.shareSupply) != 0 ? (
         <div className="flex items-center justify-between text-white text-sm mb-4">
           <p className="text-left  text-farmText">
             <FormattedMessage
@@ -678,18 +682,30 @@ export function RemoveLiquidity(props: {
             {Object.entries(minimumAmounts).map(
               ([tokenId, minimumAmount], i) => {
                 const token = tokens.find((t) => t.id === tokenId);
-                // console.log(token);
+
+                const minAmountValue = toReadableNumber(
+                  token.decimals,
+                  minimumAmount
+                );
+
+                const minAmountValueTitle = toPrecision(minAmountValue, 0);
+
+                const displayMinAmountValue =
+                  Number(minAmountValue) < 0.0001
+                    ? '< 0.0001'
+                    : toInternationalCurrencySystem(
+                        toPrecision(minAmountValue, 4),
+                        4
+                      );
+
                 return (
                   <section key={i} className="flex items-center mx-1">
                     {i ? <span className="mr-2">+</span> : null}
-                    <span className="mr-2 text-base">
-                      {toInternationalCurrencySystem(
-                        toPrecision(
-                          toReadableNumber(token.decimals, minimumAmount),
-                          3
-                        ),
-                        3
-                      )}
+                    <span
+                      className="mr-2 text-base"
+                      title={minAmountValueTitle}
+                    >
+                      {displayMinAmountValue}
                     </span>
                     <Icon icon={token?.icon} className="h-5 w-5" />
                   </section>

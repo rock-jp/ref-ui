@@ -110,17 +110,23 @@ const ChartChangeButton = ({
       }}
     >
       <button
-        className={`py-0.5 w-14 rounded-xl ${
+        className={`py-0.5 px-1 rounded-xl ${
           chartDisplay === 'tvl' ? 'bg-charBtnBg' : ' text-gray-500'
         }`}
+        style={{
+          minWidth: '56px',
+        }}
         onClick={() => setChartDisplay('tvl')}
       >
         <FormattedMessage id="tvl" defaultMessage="TVL" />
       </button>
       <button
-        className={`py-0.5 w-14 rounded-xl ${
+        className={`p-0.5 px-1 rounded-xl ${
           chartDisplay === 'volume' ? ' bg-charBtnBg' : ' text-gray-500'
         }`}
+        style={{
+          minWidth: '56px',
+        }}
         onClick={() => setChartDisplay('volume')}
       >
         <FormattedMessage id="volume" defaultMessage="Volume" />
@@ -576,13 +582,11 @@ export function PoolDetail({
           </span>
         </div>
 
-        <div className="flex items-center">
-          <RateExchanger
-            onChange={() => {
-              setRateReverse(!rateReverse);
-            }}
-          />
-
+        <div
+          className={`flex items-center ${
+            Number(pool.shareSupply) > 0 ? 'block' : 'hidden'
+          }`}
+        >
           <GetExchangeRate
             tokens={
               rateReverse
@@ -591,38 +595,62 @@ export function PoolDetail({
             }
             pool={pool}
           />
+
+          <RateExchanger
+            onChange={() => {
+              setRateReverse(!rateReverse);
+            }}
+          />
         </div>
       </div>
     );
   };
 
-  const TokenIdRender = ({ id }: { id: string }) => {
+  const TokenIdRender = ({
+    id,
+    tokenIds,
+  }: {
+    id: string;
+    tokenIds: string[];
+  }) => {
     return (
       <a
         target="_blank"
-        href={`/swap/#${id}|${id}`}
+        href={`/swap/#${tokenIds[0]}|${tokenIds[1]}`}
         className="text-xs text-primaryText"
         title={id}
       >{`${id.substring(0, 24)}${id.length > 24 ? '...' : ''}`}</a>
     );
   };
 
-  const PoolTokenInfo = ({ token }: { token: TokenMetadata }) => {
+  const PoolTokenInfo = ({
+    token,
+    pool,
+  }: {
+    token: TokenMetadata;
+    pool: Pool;
+  }) => {
     if (!token) return null;
+
+    const tokenSupply = toReadableNumber(
+      token.decimals,
+      pool.supplies[token.id]
+    );
+
+    const displayTitle =
+      Number(tokenSupply) < 0.01 ? '< 0.01' : toPrecision(tokenSupply, 0);
 
     return (
       <div className="bg-black bg-opacity-20 rounded-lg px-5 py-2 flex items-center justify-between text-sm">
         <div className=" flex flex-col text-primaryText">
           <span>{toRealSymbol(token.symbol)}</span>
           <span>
-            <TokenIdRender id={token.id} />
+            <TokenIdRender id={token.id} tokenIds={pool.tokenIds} />
           </span>
         </div>
 
-        <span className="text-white text-base">
-          {toInternationalCurrencySystem(
-            toReadableNumber(token.decimals, pool.supplies[token.id])
-          )}
+        <span className="text-white text-base" title={displayTitle}>
+          {toInternationalCurrencySystem(tokenSupply)}
         </span>
       </div>
     );
@@ -631,15 +659,19 @@ export function PoolDetail({
   const DetailInfo = ({
     title,
     value,
+    valueTitle,
   }: {
     title: string | JSX.Element;
     value: string;
+    valueTitle?: string;
   }) => {
     return (
       <div className="flex items-center flex-col justify-center text-sm">
         <span className="text-primaryText ">{title}</span>
 
-        <span className="text-white">{value}</span>
+        <span className="text-white" title={valueTitle}>
+          {value}
+        </span>
       </div>
     );
   };
@@ -656,10 +688,10 @@ export function PoolDetail({
 
       <div className="flex items-center justify-between w-full">
         <div className="mr-2 w-full">
-          <PoolTokenInfo token={tokens?.[pool.tokenIds[0]]} />
+          <PoolTokenInfo token={tokens?.[pool.tokenIds[0]]} pool={pool} />
         </div>
         <div className="ml-2 w-full">
-          <PoolTokenInfo token={tokens?.[pool.tokenIds[1]]} />
+          <PoolTokenInfo token={tokens?.[pool.tokenIds[1]]} pool={pool} />
         </div>
       </div>
 
@@ -671,6 +703,11 @@ export function PoolDetail({
         <DetailInfo
           title={<FormattedMessage id="tvl" defaultMessage="TVL" />}
           value={`$ ${toInternationalCurrencySystem(poolTVL?.toString())}`}
+          valueTitle={
+            Number(poolTVL || '0') < 0.01
+              ? '< 0.01'
+              : toPrecision(poolTVL?.toString(), 0)
+          }
         />
         <DetailInfo
           title={

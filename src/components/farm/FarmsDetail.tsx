@@ -92,7 +92,7 @@ export default function FarmsDetail(props: any) {
     });
   };
   return (
-    <div className={`w-1/3 m-auto`} style={{ minWidth: '580px' }}>
+    <div className={`m-auto lg:w-580px md:w-5/6 xs:w-11/12`}>
       <div className="breadCrumbs flex items-center text-farmText text-base hover:text-white">
         <ArrowLeftIcon onClick={goBacktoFarms} className="cursor-pointer" />
         <label className="cursor-pointer" onClick={goBacktoFarms}>
@@ -102,7 +102,7 @@ export default function FarmsDetail(props: any) {
       <div className="pairTab flex justify-between items-center mt-7">
         <div className="left flex items-center h-11 ml-3">
           <span className="flex">{displayImgs()}</span>
-          <span className="flex items-center cursor-pointer text-white font-bold text-2xl ml-4">
+          <span className="flex items-center cursor-pointer text-white font-bold text-xl ml-4">
             {displaySymbols()}
           </span>
         </div>

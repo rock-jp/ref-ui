@@ -168,7 +168,7 @@ export function NewFarmInputAmount({
               style={{ lineHeight: 'unset', cursor: 'pointer' }}
               onClick={() => handleChange(max)}
             >
-              <span>MAX</span>
+              <span>Max</span>
             </a>
             <span className="text-base font-bold text-white ml-3 whitespace-nowrap">
               {tokenSymbol}
