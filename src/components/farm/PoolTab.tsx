@@ -158,7 +158,7 @@ export default function PoolTab(props: any) {
       </div>
 
       <div
-        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 pt-3 pb-16 ${
+        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 xs:px-6 pt-3 pb-16 ${
           hidden || poolId === STABLE_POOL_ID ? 'hidden' : ''
         }`}
       >
@@ -167,11 +167,13 @@ export default function PoolTab(props: any) {
             onClick={() => {
               switchTab('add');
             }}
-            className={`flex relative items-center w-1/2 text-lg py-3.5  pl-20 cursor-pointer ${
+            className={`flex relative items-center w-1/2 text-lg py-3.5 justify-center cursor-pointer ${
               activeTab == 'add' ? 'text-white' : 'text-primaryText'
             }`}
           >
-            <FormattedMessage id="add_liquidity" />
+            <span>
+              <FormattedMessage id="add_liquidity" />
+            </span>
             <div
               className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
                 activeTab == 'add' ? 'bg-greenColor' : ''
@@ -182,11 +184,13 @@ export default function PoolTab(props: any) {
             onClick={() => {
               switchTab('remove');
             }}
-            className={`flex relative items-center w-1/2  text-lg py-3.5 pl-20 cursor-pointer ${
+            className={`flex relative items-center w-1/2  text-lg py-3.5 cursor-pointer justify-center ${
               activeTab == 'remove' ? 'text-white' : 'text-primaryText'
             }`}
           >
-            <FormattedMessage id="remove"></FormattedMessage>
+            <span>
+              <FormattedMessage id="remove" />
+            </span>
             <div
               className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
                 activeTab == 'remove' ? 'bg-greenColor' : ''
@@ -592,16 +596,14 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         </span>
       </div>
       {canDeposit ? (
-        <div className="flex xs:flex-col md:flex-col justify-between items-center rounded-md mb-6 py-3 px-4 border border-warnColor">
-          <div className="flex items-center xs:mb-3 md:mb-3">
-            <label className="text-base text-warnColor xs:text-sm md:text-sm">
-              <FormattedMessage id="oops" defaultMessage="Oops" />!
-            </label>
-            <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
-              <FormattedMessage id="you_do_not_have_enough" />{' '}
-              {modal?.token?.symbol}.
-            </label>
-          </div>
+        <div className="flex items-center rounded-md mb-6 py-3 px-4 xs:px-2 border border-warnColor">
+          <label className="text-base text-warnColor xs:text-sm md:text-sm">
+            <FormattedMessage id="oops" defaultMessage="Oops" />!
+          </label>
+          <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
+            <FormattedMessage id="you_do_not_have_enough" />{' '}
+            {modal?.token?.symbol}.
+          </label>
         </div>
       ) : null}
 

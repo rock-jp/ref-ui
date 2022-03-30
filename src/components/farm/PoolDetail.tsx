@@ -681,18 +681,18 @@ export function PoolDetail({
   return (
     <Card
       padding="px-6 pt-8 pb-6"
-      width="w-580px"
+      width="w-full"
       className={`mx-auto flex flex-col relative bottom-10 ${
         showDetail ? 'block' : 'hidden'
       }`}
     >
       <Header />
 
-      <div className="flex items-center justify-between w-full">
-        <div className="mr-2 w-full">
+      <div className="flex xs:flex-col items-center justify-between w-full">
+        <div className="mr-2 xs:mr-0 w-full">
           <PoolTokenInfo token={tokens?.[pool.tokenIds[0]]} pool={pool} />
         </div>
-        <div className="ml-2 w-full">
+        <div className="ml-2 xs:ml-0 xs:mt-2 w-full">
           <PoolTokenInfo token={tokens?.[pool.tokenIds[1]]} pool={pool} />
         </div>
       </div>
