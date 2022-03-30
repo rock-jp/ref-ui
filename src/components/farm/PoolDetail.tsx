@@ -110,17 +110,23 @@ const ChartChangeButton = ({
       }}
     >
       <button
-        className={`py-0.5 w-14 rounded-xl ${
+        className={`py-0.5 px-1 rounded-xl ${
           chartDisplay === 'tvl' ? 'bg-charBtnBg' : ' text-gray-500'
         }`}
+        style={{
+          minWidth: '56px',
+        }}
         onClick={() => setChartDisplay('tvl')}
       >
         <FormattedMessage id="tvl" defaultMessage="TVL" />
       </button>
       <button
-        className={`py-0.5 w-14 rounded-xl ${
+        className={`p-0.5 px-1 rounded-xl ${
           chartDisplay === 'volume' ? ' bg-charBtnBg' : ' text-gray-500'
         }`}
+        style={{
+          minWidth: '56px',
+        }}
         onClick={() => setChartDisplay('volume')}
       >
         <FormattedMessage id="volume" defaultMessage="Volume" />
@@ -576,7 +582,11 @@ export function PoolDetail({
           </span>
         </div>
 
-        <div className="flex items-center">
+        <div
+          className={`flex items-center ${
+            Number(pool.shareSupply) > 0 ? 'block' : 'hidden'
+          }`}
+        >
           <RateExchanger
             onChange={() => {
               setRateReverse(!rateReverse);
@@ -619,7 +629,13 @@ export function PoolDetail({
           </span>
         </div>
 
-        <span className="text-white text-base">
+        <span
+          className="text-white text-base"
+          title={toPrecision(
+            toReadableNumber(token.decimals, pool.supplies[token.id]),
+            0
+          )}
+        >
           {toInternationalCurrencySystem(
             toReadableNumber(token.decimals, pool.supplies[token.id])
           )}
