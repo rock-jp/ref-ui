@@ -1879,9 +1879,7 @@ function ActionModal(
   const [showTip, setShowTip] = useState<boolean>(false);
   const [showCalc, setShowCalc] = useState(false);
   const cardWidth = isMobile() ? '90vw' : '30vw';
-  let tokens = useTokens(farm?.tokenIds) || [];
-
-  tokens = tokens?.map((token) => unWrapToken(token, true));
+  const tokens = useTokens(farm?.tokenIds) || [];
 
   const [displayTokenData, setDisplayTokenData] = useState<Record<string, any>>(
     {}
@@ -1911,19 +1909,21 @@ function ActionModal(
   useEffect(() => {
     let imgs: any = [];
     let symbols: any = [];
-    tokens.forEach(({ icon, id, symbol }, index) => {
-      imgs.push(
-        <img
-          src={icon}
-          key={id + index}
-          className={
-            'w-10 h-10 xs:w-9 md:w-9 xs:h-9 md:h-9 rounded-full border border-gradientFromHover ' +
-            (index != 0 ? '-ml-1.5' : '')
-          }
-        />
-      );
-      symbols.push(symbol);
-    });
+    tokens
+      .map((token) => unWrapToken(token, true))
+      .forEach(({ icon, id, symbol }, index) => {
+        imgs.push(
+          <img
+            src={icon}
+            key={id + index}
+            className={
+              'w-10 h-10 xs:w-9 md:w-9 xs:h-9 md:h-9 rounded-full border border-gradientFromHover ' +
+              (index != 0 ? '-ml-1.5' : '')
+            }
+          />
+        );
+        symbols.push(symbol);
+      });
     setDisplayTokenData({
       imgs,
       symbols: symbols.join('-'),
