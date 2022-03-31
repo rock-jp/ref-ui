@@ -316,7 +316,7 @@ const vi = {
     'Total Fee Revenue Shared with xREF Holders',
   provision_treasury: 'Kho dự phòng',
   protocol_projected_revenue_tip:
-    'Con số này tương ứng với doanh thu phí giao dịch được chia sẻ tích lũy cho người nắm giữ REF. Con số trên bằng 75% tổng doanh thu phí nền tảng. Nó sẽ khác với số tiền mua lại token REF thực tế do biến động giá.', // todo
+    'Con số này tương ứng với doanh thu phí giao dịch được chia sẻ tích lũy cho người nắm giữ REF. Con số trên bằng 75% tổng doanh thu phí nền tảng. Nó sẽ khác với số tiền mua lại token REF thực tế do biến động giá.',
   stake_ref_to_xref_for_earning_more: 'Stake REF, nhận xREF để earn thêm REF!',
   auto_router: 'Router tự động',
   auto_router_detail_sub_1: 'Tuyến này giúp tối ưu giao dịch của bạn bằng',
@@ -420,5 +420,6 @@ const vi = {
   you_have: 'Bạn có',
   stable_pool_to_add_liquidity_now:
     'hồ bơi ổn định để thêm thanh khoản ngay bây giờ',
+  cd_limit: 'more than 16 cd account limit',
 };
 export default vi;

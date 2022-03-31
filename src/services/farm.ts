@@ -495,7 +495,6 @@ export const claimAndWithDrawReward = async (
 };
 // new interface start
 export async function farm_list_v2(page = 1, perPage = DEFAULT_PAGE_LIMIT) {
-  // todo
   const index = (page - 1) * perPage;
   let farms: Farm[] = await refFarmV2ViewFunction({
     methodName: 'list_farms',

@@ -387,5 +387,6 @@ const uk_UA = {
   booster_change_reason: 'Booster will change due to appending time',
   initial_booster: 'Initial Booster',
   append_timing: 'Append timing',
+  cd_limit: 'more than 16 cd account limit',
 };
 export default uk_UA;

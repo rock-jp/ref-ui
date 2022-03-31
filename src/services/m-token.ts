@@ -269,8 +269,64 @@ export const withdrawAllReward = async (
 
   return executeFarmMultipleTransactions(transactions);
 };
+export const withdrawAllReward_v2 = async (
+  checkedList: Record<string, any>,
+  unregister = false
+) => {
+  const transactions: Transaction[] = [];
+  const token_id_list = Object.keys(checkedList);
+  const ftBalancePromiseList: any[] = [];
+  const functionCalls: any[] = [];
+  token_id_list.forEach((token_id) => {
+    const ftBalance = ftGetStorageBalance(token_id);
+    ftBalancePromiseList.push(ftBalance);
+    if (token_id == WRAP_NEAR_CONTRACT_ID) {
+      functionCalls.push({
+        methodName: 'near_withdraw',
+        args: {
+          token_id: token_id,
+          args: {
+            amount: utils.format.parseNearAmount(checkedList[token_id].value),
+          },
+        },
+        gas: '50000000000000',
+        amount: ONE_YOCTO_NEAR,
+      });
+    } else {
+      functionCalls.push({
+        methodName: 'withdraw_reward',
+        args: {
+          token_id: token_id,
+          amount: checkedList[token_id].value,
+          unregister,
+        },
+        gas: '50000000000000',
+        amount: ONE_YOCTO_NEAR,
+      });
+    }
+  });
+  const resolvedBalanceList = await Promise.all(ftBalancePromiseList);
+  resolvedBalanceList.forEach((ftBalance, index) => {
+    if (!ftBalance || ftBalance.total === '0') {
+      transactions.unshift({
+        receiverId: token_id_list[index],
+        functionCalls: [
+          storageDepositAction({
+            registrationOnly: true,
+            amount: STORAGE_TO_REGISTER_WITH_MFT,
+          }),
+        ],
+      });
+    }
+  });
+
+  transactions.push({
+    receiverId: REF_FARM_V2_CONTRACT_ID,
+    functionCalls,
+  });
+  return executeFarmMultipleTransactions(transactions);
+};
 export const stake_v2 = async ({
-  // todo
   token_id,
   amount,
   msg = '',
@@ -305,7 +361,6 @@ export const stake_v2 = async ({
   return executeFarmMultipleTransactions(transactions);
 };
 export const unstake_v2_free = async ({
-  // todo
   seed_id,
   amount,
   msg = '',
@@ -338,11 +393,7 @@ export const unstake_v2_free = async ({
 
   return executeFarmMultipleTransactions(transactions);
 };
-export const unstake_v2_cd = async ({
-  // todo
-  index,
-  amount,
-}: UnstakeCdOptions) => {
+export const unstake_v2_cd = async ({ index, amount }: UnstakeCdOptions) => {
   const transactions: Transaction[] = [
     {
       receiverId: REF_FARM_V2_CONTRACT_ID,

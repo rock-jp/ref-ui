@@ -409,5 +409,6 @@ const en_US = {
   booster_change_reason: 'Booster will change due to appending time',
   initial_booster: 'Initial Booster',
   append_timing: 'Append timing',
+  cd_limit: 'more than 16 cd account limit',
 };
 export default en_US;

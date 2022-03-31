@@ -54,13 +54,14 @@ import {
   getServerTime,
   get_seed_info,
 } from '~services/farm';
-import { Checkbox, CheckboxSelected } from '~components/icon';
+import { Checkbox, CheckboxSelected, NoDataIcon } from '~components/icon';
 import { ErrorTriangle } from '~components/icon/SwapRefresh';
 import { ftGetTokenMetadata, unWrapToken } from '../../services/ft-contract';
 import { useTokens } from '~state/token';
 import { useHistory } from 'react-router-dom';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
+const MAX_CD_ACCOUNT_NUMBER = 16;
 export default function StakeTab(props: any) {
   const { signedInState } = useContext(WalletContext);
   const isSignedIn = signedInState.isSignedIn;
@@ -151,6 +152,7 @@ export default function StakeTab(props: any) {
               }`}
             ></div>
           </div>
+          <div className="absolute w-full h-0.5 bottom-0 left-0 rounded-full bg-black bg-opacity-20"></div>
         </div>
         {activeTab == 'stake' ? (
           <>
@@ -227,6 +229,9 @@ function StakeArea(props: any) {
     useState<Record<string, string>>();
   const [select_cd_price, set_select_cd_price] = useState<string>();
   const [boosterSwitchOn, setBoosterSwitchOn] = useState(true);
+  const [user_cd_account_list, set_ser_cd_account_list] = useState<any[]>([]);
+  const [stakeButtonLoading, setStakeButtonLoading] = useState<boolean>(true);
+  const [limitError, setLimitError] = useState<Boolean>(false);
   const { detailData, tokenPriceList, cd_strategy } = props;
   const seedId = detailData[0]['seed_id'];
   const pool = detailData[0]['pool'];
@@ -235,6 +240,7 @@ function StakeArea(props: any) {
   const isSignedIn = signedInState.isSignedIn;
   useEffect(() => {
     getStakeBalance(pool.id);
+    get_user_cd_account_list();
   }, []);
   useEffect(() => {
     if (cd_strategy) {
@@ -246,6 +252,21 @@ function StakeArea(props: any) {
       });
     }
   }, [cd_strategy]);
+  useEffect(() => {
+    if (
+      user_cd_account_list?.length >= MAX_CD_ACCOUNT_NUMBER &&
+      boosterSwitchOn
+    ) {
+      setLimitError(true);
+    } else {
+      setLimitError(false);
+    }
+  }, [user_cd_account_list, boosterSwitchOn]);
+  const get_user_cd_account_list = async () => {
+    const list = await list_user_cd_account();
+    set_ser_cd_account_list(list);
+    setStakeButtonLoading(false);
+  };
   const getStakeBalance = async (id: string) => {
     const b = await mftGetBalance(getMftTokenId(id.toString()));
     if (STABLE_POOL_ID == id) {
@@ -328,7 +349,8 @@ function StakeArea(props: any) {
     !stakeAmount ||
     !stakeAmountAvailableCheck ||
     new BigNumber(stakeAmount).isLessThanOrEqualTo(0) ||
-    new BigNumber(stakeAmount).isGreaterThan(balance);
+    new BigNumber(stakeAmount).isGreaterThan(balance) ||
+    stakeButtonLoading;
 
   const getFuturePrices = (item: {
     num: string | number;
@@ -522,7 +544,12 @@ function StakeArea(props: any) {
         </div>
       </div>
       <div className="flex justify-center mt-2">
-        {!stakeAmountAvailableCheck ? (
+        {limitError ? (
+          <Alert
+            level="warn"
+            message={intl.formatMessage({ id: 'cd_limit' })}
+          />
+        ) : !stakeAmountAvailableCheck ? (
           <Alert
             level="warn"
             message={
@@ -540,12 +567,20 @@ function StakeArea(props: any) {
           }}
           color="#fff"
           disabled={isDisabled}
+          loading={stakeButtonLoading}
           btnClassName={`${isDisabled ? 'cursor-not-allowed' : ''}`}
           className={`mt-6 w-full h-12 text-center text-base text-white focus:outline-none font-semibold ${
             isDisabled ? 'opacity-40 cursor-not-allowed' : ''
           }`}
         >
-          <FormattedMessage id="stake" defaultMessage="Stake" />
+          <div>
+            <ButtonTextWrapper
+              loading={stakeButtonLoading}
+              Text={() => (
+                <FormattedMessage id="stake" defaultMessage="Stake" />
+              )}
+            />
+          </div>
         </GradientButton>
       ) : (
         <ConnectToNearButton className="mt-6"></ConnectToNearButton>
@@ -561,6 +596,7 @@ function StakeArea(props: any) {
           amount={stakeAmount}
           strategy={selected_cd_strategy}
           boosterSwitchOn={boosterSwitchOn}
+          user_cd_account_list={user_cd_account_list}
         ></StakeModal>
       ) : null}
     </div>
@@ -569,7 +605,6 @@ function StakeArea(props: any) {
 function StakedList(props: any) {
   const { signedInState } = useContext(WalletContext);
   const isSignedIn = signedInState.isSignedIn;
-  const [seedUserInfo, setSeedUserInfo] = useState<Record<string, any>>({});
   const [unclaimedRewardData, setUnclaimedRewardData] =
     useState<Record<string, any>>(null);
   const [hoverLine, setHoverLine] = useState<string | number>('');
@@ -577,12 +612,10 @@ function StakedList(props: any) {
     props;
   const [appendStakeModalVisible, setAppendStakeModalVisible] = useState(false);
   const [appendAccount, setAppendAccount] = useState();
-  const seedId = detailData[0]['seed_id'];
-  const pool = detailData[0]['pool'];
   const farm = detailData[0];
+  const { userSeedInfo: seedUserInfoOriginData, pool } = farm;
   const intl = useIntl();
   useEffect(() => {
-    getUserSeedInfoBySeedId();
     getUnclaimedRewardData();
   }, []);
   function getUnclaimedRewardData() {
@@ -631,22 +664,21 @@ function StakedList(props: any) {
     });
     return Object.values(tempMap);
   }
-  const getUserSeedInfoBySeedId = async () => {
-    const seedUserInfo = await get_user_seed_info_by_seedId({ seedId: seedId });
-    if (seedUserInfo) {
-      const { cds = [], amount, seed_id } = seedUserInfo;
+  const getUserSeedInfoBySeedId = (seedUserInfoOriginData: any) => {
+    if (seedUserInfoOriginData && +seedUserInfoOriginData.amount > 0) {
+      const { cds = [], amount, seed_id } = seedUserInfoOriginData;
       let freeAmount = new BigNumber(amount);
       cds.forEach((item: any) => {
         const { seed_amount } = item;
         freeAmount = freeAmount.minus(seed_amount);
       });
-      seedUserInfo.free = {
+      seedUserInfoOriginData.free = {
         seed_amount: freeAmount.toFixed(),
         seed_power: freeAmount.toFixed(),
         seed_id,
         isFree: true,
       };
-      setSeedUserInfo(seedUserInfo);
+      return seedUserInfoOriginData;
     }
   };
   const displayStakedShares = (curAmount: string) => {
@@ -672,6 +704,7 @@ function StakedList(props: any) {
     );
   };
   const displayUnClaimedUi = (account: any) => {
+    if (!unclaimedRewardData) return null;
     const { seed_power } = account;
     const total_power = seedUserInfo.power;
     const percent = new BigNumber(seed_power).dividedBy(total_power).toString();
@@ -803,10 +836,12 @@ function StakedList(props: any) {
   const booster_change_reason = intl.formatMessage({
     id: 'booster_change_reason',
   });
+  const seedUserInfo = getUserSeedInfoBySeedId(seedUserInfoOriginData) || {};
+  const isShowStakedList = seedUserInfo?.free || seedUserInfo?.cds?.length > 0;
   return (
     <div
       className={`stakedBox relative bg-cardBg  px-7 py-3 ${
-        activeTab == 'stake' ? 'rounded-2xl mt-3' : '-mt-9'
+        activeTab == 'stake' ? 'rounded-2xl mt-3' : 'rounded-b-2xl -mt-9'
       }`}
     >
       <div className={`titie mb-1.5 ${activeTab == 'stake' ? '' : 'hidden'}`}>
@@ -815,7 +850,17 @@ function StakedList(props: any) {
         </div>
         <div className="line h-0.5 bg-black bg-opacity-20 rounded-full"></div>
       </div>
-      {seedUserInfo.free && (
+      {/* no data start */}
+      {!isShowStakedList ? (
+        <div className="flex flex-col w-full justify-center items-center mt-5 mb-8">
+          <NoDataIcon />
+          <span className="text-farmText text-base mt-4 text-center w-48">
+            <FormattedMessage id="no_data"></FormattedMessage>
+          </span>
+        </div>
+      ) : null}
+      {/* no data end */}
+      {seedUserInfo?.free && (
         <div className="mt-3 px-3 pb-5 pt-px bg-black bg-opacity-20 rounded-lg">
           <CommonLine title="my_shares">
             <span className="flex items-center">
@@ -979,98 +1024,6 @@ function StakedList(props: any) {
           onRequestClose={closeAppendStakeModal}
         ></AppendStakeModal>
       ) : null}
-    </div>
-  );
-}
-
-function UnstakeList() {
-  return (
-    <div>
-      {[1, 2, 3].map((item) => {
-        return (
-          <div
-            key={item}
-            className="mt-3 px-3 pb-5 pt-px bg-black bg-opacity-20 rounded-lg"
-          >
-            <CommonLine title="my_shares">
-              <span className="flex items-center">
-                <label className="text-white text-lg">30</label>
-                <label className="text-farmText text-sm ml-1.5">0.13%</label>
-              </span>
-            </CommonLine>
-            <CommonLine title="rewards">
-              <div className="flex flex-col items-end">
-                <label className="text-white text-sm">$352.02</label>
-                <div className="flex items-center mt-2">
-                  <span className="flex items-center text-white text-sm mr-2.5">
-                    <img src="" className="w-5 h-5 rounded-full"></img>
-                    <label className="ml-1.5 mr-2.5">62.291</label>
-                    <label>+</label>
-                  </span>
-                  <span className="flex items-center text-white text-sm mr-2.5">
-                    <img src="" className="w-5 h-5 rounded-full"></img>
-                    <label className="ml-1.5 mr-2.5">62.291</label>
-                    <label>+</label>
-                  </span>
-                  <span className="flex items-center text-white text-sm">
-                    <img src="" className="w-5 h-5 rounded-full"></img>
-                    <label className="ml-1.5">62.291</label>
-                  </span>
-                </div>
-              </div>
-            </CommonLine>
-            <CommonLine title="stake_period">
-              <div className="flex items-center">
-                <div
-                  className="text-white text-right"
-                  data-class="reactTip"
-                  data-for="staked_time_id"
-                  data-place="top"
-                  data-html={true}
-                  data-tip={
-                    '<span class="text-farmText text-xs">18:03 Jan 01, 2022 - Jun 01, 2022</span>'
-                  }
-                >
-                  <div
-                    style={{ width: '210px', height: '5px' }}
-                    className="relative rounded-lg bg-darkBg mr-3.5"
-                  >
-                    <div
-                      className="absolute h-full rounded-lg left-0 top-0 bg-lightBg"
-                      style={{ width: '35%' }}
-                    ></div>
-                  </div>
-                  <ReactTooltip
-                    id="staked_time_id"
-                    backgroundColor="#1D2932"
-                    border
-                    borderColor="#7e8a93"
-                    effect="solid"
-                  />
-                </div>
-                <span className="text-white text-sm">32% of 6 months</span>
-              </div>
-            </CommonLine>
-            <div className="flex items-center mt-4">
-              <UnstakeInput></UnstakeInput>
-              <div>
-                {/* <GradientButton
-                  color="#fff"
-                  className={`w-24 h-10 text-center text-base text-white focus:outline-none font-semibold `}
-                >
-                  <FormattedMessage id="unstake" defaultMessage="Unstake" />
-                </GradientButton> */}
-                <OprationButton
-                  color="#fff"
-                  className={`w-24 h-10 text-center text-base text-white focus:outline-none font-semibold `}
-                >
-                  <LockedIcon></LockedIcon>
-                </OprationButton>
-              </div>
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -1279,21 +1232,21 @@ function AppendStakeModal(props: any) {
   );
 }
 function StakeModal(props: any) {
-  const { detailData, amount, strategy, boosterSwitchOn } = props;
+  const {
+    detailData,
+    amount,
+    strategy,
+    boosterSwitchOn,
+    user_cd_account_list,
+  } = props;
   const [serverTime, setServerTime] = useState<string | number>();
   const [error, setError] = useState<Error>();
   const [stakeLoading, setStakeLoading] = useState<boolean>(false);
-  const [user_cd_account_list, set_ser_cd_account_list] = useState<any[]>([]);
   const pool = detailData[0].pool;
   const tokens = useTokens(pool.token_account_ids) || [];
   useEffect(() => {
     get_server_time();
-    get_user_cd_account_list();
   }, []);
-  const get_user_cd_account_list = async () => {
-    const list = await list_user_cd_account();
-    set_ser_cd_account_list(list);
-  };
   const get_server_time = async () => {
     const timestamp = await getServerTime();
     const serverTime = new BigNumber(timestamp)

@@ -399,5 +399,6 @@ const zh_CN = {
   you_have: '你有',
   Go_to: '去',
   stable_pool_to_add_liquidity_now: '稳定池来添加流动性',
+  cd_limit: '超过最多16个定期账户的限制',
 };
 export default zh_CN;

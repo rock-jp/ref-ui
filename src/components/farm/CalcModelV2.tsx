@@ -445,7 +445,6 @@ export function CalcEle(props: {
     };
     stake_strategy.filter((item: cdStrategy, index: number) => {
       if (item.enable) {
-        // todo
         const days = item.lock_sec / (24 * 60 * 60);
         const month = days / 30;
         const rate = item.power_reward_rate / 10000 + 1;

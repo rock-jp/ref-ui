@@ -6,7 +6,6 @@ import {
   MultiIcon,
   CalcIcon,
   UpArrowIcon,
-  SnakeImg,
   SnakeImgLong,
 } from '~components/icon/FarmV2';
 import {
@@ -49,7 +48,7 @@ import { getPoolsByIds } from '../../services/indexer';
 import {
   LP_TOKEN_DECIMALS,
   LP_STABLE_TOKEN_DECIMALS,
-  withdrawAllReward,
+  withdrawAllReward_v2,
 } from '../../services/m-token';
 import {
   toPrecision,
@@ -89,6 +88,7 @@ export default function FarmsHome(props: any) {
   const { signedInState } = useContext(WalletContext);
   const isSignedIn = signedInState.isSignedIn;
   const [noData, setNoData] = useState(false);
+  const [count, setCount] = useState(0);
   const refreshTime = 120000;
   /** search area options start **/
   const sortList = {
@@ -118,6 +118,11 @@ export default function FarmsHome(props: any) {
     (!isSignedIn && farmV2Status) == 'my' ? 'live' : farmV2Status || 'live'
   );
   let [coin, setCoin] = useState('all');
+  const [searchData, setSearchData] = useState<any>({
+    sort,
+    status,
+    coin,
+  });
   const { getDetailData } = props;
   const location = useLocation();
   const history = useHistory();
@@ -126,14 +131,18 @@ export default function FarmsHome(props: any) {
     init();
     get_list_user_rewards_v2();
   }, [isSignedIn]);
+
   useEffect(() => {
-    const intervalId = setInterval(() => {
+    if (count > 0) {
       init();
+    }
+    const intervalId = setInterval(() => {
+      setCount(count + 1);
     }, refreshTime);
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [count]);
   useEffect(() => {
     let search = false;
     const searchParams = new URLSearchParams(location.search);
@@ -142,11 +151,13 @@ export default function FarmsHome(props: any) {
     if (sort_from_url && sort_from_url !== sort) {
       sort = sort_from_url;
       setSort(sort_from_url);
+      searchData.sort = sort_from_url;
       search = true;
     }
     if (status_from_url && status_from_url !== status) {
       status = status_from_url;
       setStatus(status_from_url);
+      searchData.status = status_from_url;
       search = true;
     }
     if (search) {
@@ -311,13 +322,7 @@ export default function FarmsHome(props: any) {
         return true;
       }
     });
-    // get pools
-    // let pool_ids = validFarmList.map((f: any) => {
-    //   return getLPTokenId(f.farm_id);
-    // });
-    // pool_ids = Array.from(new Set(pool_ids))
     let poolList: Record<string, PoolRPCView> = {};
-    // const pools = await getPoolsByIds({ pool_ids });
     if (pools) {
       poolList = pools.reduce(
         (obj: any, pool: any) => ({ ...obj, [pool.id]: pool }),
@@ -347,7 +352,7 @@ export default function FarmsHome(props: any) {
     tokenPriceList,
   }: any) {
     const isSignedIn: boolean = getCurrentWallet().wallet.isSignedIn();
-    const { tvl, token_account_ids, id: poolId } = pool;
+    const { tvl, id: poolId } = pool;
     const DECIMALS =
       STABLE_POOL_ID == poolId ? LP_STABLE_TOKEN_DECIMALS : LP_TOKEN_DECIMALS;
     // get seed total stake worth
@@ -400,7 +405,6 @@ export default function FarmsHome(props: any) {
             2
           );
     // get user unClaimed reward amount
-    const seedId = farm.farm_id.slice(0, farm.farm_id.lastIndexOf('#'));
     let userUnclaimedRewardNumber: string =
       isSignedIn && +userStakedAmount
         ? await getUnclaimedReward_v2(farm.farm_id)
@@ -427,18 +431,18 @@ export default function FarmsHome(props: any) {
   function changeSort(option: any) {
     const [id] = option;
     setSort(id);
-    sort = id;
+    searchData.sort = id;
     searchByCondition();
   }
   function changeStatus(statusSelectOption: string) {
     localStorage.setItem('farmV2Status', statusSelectOption);
     setStatus(statusSelectOption);
-    status = statusSelectOption;
+    searchData.status = statusSelectOption;
     searchByCondition();
   }
   function changeCoin(coinSelectOption: string) {
     setCoin(coinSelectOption);
-    coin = coinSelectOption;
+    searchData.coin = coinSelectOption;
     searchByCondition();
   }
   function searchByCondition() {
@@ -452,6 +456,7 @@ export default function FarmsHome(props: any) {
     //   setStatus('my')
     // }
     // filter
+    const { status, coin, sort } = searchData;
     farm_display_List.forEach((item: FarmKind[] & extendType) => {
       // filter by both status and coin
       const { userStakedAmount, pool, seed_id, farm_id } = item[0];
@@ -460,7 +465,6 @@ export default function FarmsHome(props: any) {
       const { token_symbols, id } = pool;
       let condition1,
         condition2 = false;
-
       if (status == 'my') {
         if (useStaked) {
           let total_userUnclaimedReward = 0;
@@ -1491,7 +1495,7 @@ function WithDrawBox(props: {
   }
   async function doWithDraw() {
     setWithdrawLoading(true);
-    withdrawAllReward(checkedList);
+    withdrawAllReward_v2(checkedList);
   }
   function getTotalUnClaimedRewardsPrice() {
     const rewardTokenList = {};
