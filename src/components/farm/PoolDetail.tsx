@@ -64,7 +64,11 @@ import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 
 import { useWalletTokenBalances } from '../../state/token';
 import { SmallWallet } from '../../components/icon/SmallWallet';
-import { ftGetTokensMetadata } from '../../services/ft-contract';
+import {
+  ftGetTokensMetadata,
+  wrapToken,
+  unWrapToken,
+} from '../../services/ft-contract';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { StableSwapExchangePC, RateExchanger } from '../icon/Arrows';
 import { scientificNotationToString } from '../../utils/numbers';
@@ -560,11 +564,13 @@ export function PoolDetail({
 
   if (!tokens) return <Loading />;
 
+  const unWrapedTokens = Object.values(tokens).map((t) => unWrapToken(t, true));
+
   const Header = () => {
     return (
       <div className="flex items-center justify-between w-full pb-4">
         <div className="text-white text-lg flex items-center">
-          {Object.values(tokens).map((t, i) => {
+          {unWrapedTokens.map((t, i) => {
             return (
               <span key={i}>
                 {i ? '-' : ''}
@@ -589,9 +595,7 @@ export function PoolDetail({
         >
           <GetExchangeRate
             tokens={
-              rateReverse
-                ? Object.values(tokens).slice().reverse()
-                : Object.values(tokens)
+              rateReverse ? unWrapedTokens.slice().reverse() : unWrapedTokens
             }
             pool={pool}
           />
@@ -624,12 +628,13 @@ export function PoolDetail({
   };
 
   const PoolTokenInfo = ({
-    token,
+    token: rawToken,
     pool,
   }: {
     token: TokenMetadata;
     pool: Pool;
   }) => {
+    const token = unWrapToken(rawToken, true);
     if (!token) return null;
 
     const tokenSupply = toReadableNumber(

@@ -972,7 +972,7 @@ function FarmView(props: {
         ).valueOf();
       });
       lastList.push({
-        commonRewardToken: arr[0].rewardToken,
+        commonRewardToken: unWrapToken(arr[0].rewardToken, true),
         totalUserUnclaimedReward: totalUserUnclaimedReward,
       });
     });
