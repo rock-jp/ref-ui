@@ -323,11 +323,17 @@ export function AddLiquidityModal(
   }) {
     const firstTokenAmountBN = new BigNumber(firstAmount.toString());
     const firstTokenBalanceBN = new BigNumber(
-      toReadableNumber(tokens[0].decimals, balances[tokens[0].id])
+      getMax(
+        tokens[0].id,
+        toReadableNumber(tokens[0].decimals, balances[tokens[0].id])
+      )
     );
     const secondTokenAmountBN = new BigNumber(secondAmount.toString());
     const secondTokenBalanceBN = new BigNumber(
-      toReadableNumber(tokens[1].decimals, balances[tokens[1].id])
+      getMax(
+        tokens[1].id,
+        toReadableNumber(tokens[1].decimals, balances[tokens[1].id])
+      )
     );
 
     setCanSubmit(false);

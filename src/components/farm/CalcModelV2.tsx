@@ -25,6 +25,7 @@ import { isMobile } from '~utils/device';
 import { useTokens } from '~state/token';
 import getConfig from '~services/config';
 import { combinations } from 'mathjs';
+import { unWrapToken } from '../../services/ft-contract';
 const config = getConfig();
 const STABLE_POOL_ID = config.STABLE_POOL_ID;
 
@@ -53,7 +54,7 @@ export default function CalcModelV2(
   useEffect(() => {
     const symbolList: string[] = [];
     tokens.forEach((token) => {
-      symbolList.push(token.symbol);
+      symbolList.push(unWrapToken(token, true).symbol);
     });
     setSymbols(symbolList.join('-'));
   }, [tokens]);
@@ -574,11 +575,12 @@ export function CalcEle(props: {
             </label>
             <div className="grid grid-cols-3 gap-2 mt-3">
               {(rewardData.tokenList || []).map((item: any) => {
+                const token = unWrapToken(item, true);
                 return (
-                  <div className="flex items-center" key={item.symbol}>
+                  <div className="flex items-center" key={token.symbol}>
                     <img
                       className="w-6 h-6 xs:w-5 xs:h-5 md:w-5 md:h-5 rounded-full border border-gradientFromHover"
-                      src={item.icon}
+                      src={token.icon}
                     ></img>
                     <label className="ml-2 text-sm text-farmText">
                       {item.num || '-'}

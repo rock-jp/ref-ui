@@ -1291,7 +1291,7 @@ function FarmView({
       const { rewardToken, apr } = item;
       const itemHtml = `<div class="flex justify-between items-center h-8">
                           <image class="w-5 h-5 rounded-full mr-7" src="${
-                            rewardToken.icon
+                            unWrapToken(rewardToken).icon
                           }"/>
                           <label class="text-xs text-navHighLightText">${
                             formatWithCommas(apr) + '%'

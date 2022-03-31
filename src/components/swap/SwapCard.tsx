@@ -748,12 +748,12 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
     else makeSwap(useNearBalance);
   };
 
-  const getMax = function () {
-    return tokenIn?.id !== 'NEAR'
-      ? tokenInMax
-      : Number(tokenInMax) <= 1
+  const getMax = function (id: string, amount: string) {
+    return id !== 'NEAR'
+      ? amount
+      : Number(amount) <= 1
       ? '0'
-      : String(Number(tokenInMax) - 1);
+      : String(Number(amount) - 1);
   };
 
   return (
@@ -816,7 +816,7 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
         <TokenAmount
           amount={tokenInAmount}
           total={tokenInMax}
-          max={getMax()}
+          max={getMax(tokenIn?.id, tokenInMax)}
           tokens={allTokens}
           selectedToken={tokenIn}
           balances={balances}

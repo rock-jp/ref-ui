@@ -26,9 +26,11 @@ const COMMON_BASSES = [
 ];
 
 export default function CommonBasses({ tokens, onClick }: CommonBassesProps) {
-  const commonBassesTokens = tokens.filter((item) => {
-    return COMMON_BASSES.indexOf(item?.symbol) > -1;
-  });
+  const commonBassesTokens = tokens
+    .filter((item) => {
+      return COMMON_BASSES.indexOf(item?.symbol) > -1;
+    })
+    .sort((a, b) => (a.id === 'NEAR' ? -1 : 1));
 
   return (
     <section className="pl-8 pr-6">
