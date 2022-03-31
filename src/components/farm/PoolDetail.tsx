@@ -569,7 +569,7 @@ export function PoolDetail({
   const Header = () => {
     return (
       <div className="flex items-center justify-between w-full pb-4">
-        <div className="text-white text-lg flex items-center">
+        <div className="text-white text-lg flex items-center whitespace-nowrap">
           {unWrapedTokens.map((t, i) => {
             return (
               <span key={i}>

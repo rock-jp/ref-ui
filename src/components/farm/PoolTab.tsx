@@ -605,6 +605,15 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
       </span>
     );
   };
+
+  const getMax = function (id: string, amount: string) {
+    return id !== WRAP_NEAR_CONTRACT_ID
+      ? amount
+      : Number(amount) <= 1
+      ? '0'
+      : String(Number(amount) - 1);
+  };
+
   return (
     <div className="text-white outline-none">
       <div className="mt-8">
@@ -625,7 +634,10 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         <div className="flex items-center ">
           <NewFarmInputAmount
             className="w-full border border-transparent rounded"
-            max={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
+            max={getMax(
+              tokens[0].id,
+              toReadableNumber(tokens[0].decimals, balances[tokens[0].id])
+            )}
             onChangeAmount={changeFirstTokenAmount}
             value={firstTokenAmount}
             tokenSymbol={toRealSymbol(tokens[0].symbol)}
@@ -655,7 +667,10 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         <div className="flex items-center">
           <NewFarmInputAmount
             className="w-full border border-transparent rounded"
-            max={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
+            max={getMax(
+              tokens[1].id,
+              toReadableNumber(tokens[1].decimals, balances[tokens[1].id])
+            )}
             onChangeAmount={changeSecondTokenAmount}
             value={secondTokenAmount}
             tokenSymbol={toRealSymbol(tokens[1].symbol)}

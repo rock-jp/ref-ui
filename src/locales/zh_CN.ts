@@ -74,7 +74,7 @@ const zh_CN = {
   details: '详情',
   detail: '详情',
   liquidity_pools: '流动性资金池',
-  minimum_tokens_out: '最少可获得代币数量',
+  minimum_tokens_out: '最少获得',
   pair: '交易对',
   tvl: '总锁定价值',
   search_pools: '搜索资金池',

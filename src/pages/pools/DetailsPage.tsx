@@ -208,9 +208,7 @@ export function AddLiquidityModal(
 
   if (!balances) return null;
 
-
-  balances[WRAP_NEAR_CONTRACT_ID] = balances['NEAR']
-
+  balances[WRAP_NEAR_CONTRACT_ID] = balances['NEAR'];
 
   const changeFirstTokenAmount = (amount: string) => {
     setError(null);
@@ -468,6 +466,14 @@ export function AddLiquidityModal(
     return result;
   };
 
+  const getMax = function (id: string, amount: string) {
+    return id !== WRAP_NEAR_CONTRACT_ID
+      ? amount
+      : Number(amount) <= 1
+      ? '0'
+      : String(Number(amount) - 1);
+  };
+
   return (
     <Modal {...props}>
       <Card
@@ -538,7 +544,10 @@ export function AddLiquidityModal(
             </div>
             <InputAmount
               className="w-full border border-transparent rounded"
-              max={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
+              max={getMax(
+                tokens[0].id,
+                toReadableNumber(tokens[0].decimals, balances[tokens[0].id])
+              )}
               onChangeAmount={changeFirstTokenAmount}
               value={firstTokenAmount}
             />
@@ -573,7 +582,10 @@ export function AddLiquidityModal(
             </div>
             <InputAmount
               className="w-full border border-transparent rounded"
-              max={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
+              max={getMax(
+                tokens[1].id,
+                toReadableNumber(tokens[1].decimals, balances[tokens[1].id])
+              )}
               onChangeAmount={changeSecondTokenAmount}
               value={secondTokenAmount}
             />
@@ -612,7 +624,10 @@ export function AddLiquidityModal(
           </div>
           <InputAmount
             className="w-full border border-transparent rounded"
-            max={toReadableNumber(tokens[0].decimals, balances[tokens[0].id])}
+            max={getMax(
+              tokens[0].id,
+              toReadableNumber(tokens[0].decimals, balances[tokens[0].id])
+            )}
             onChangeAmount={changeFirstTokenAmount}
             value={firstTokenAmount}
             disabled={!isSignedIn}
@@ -656,7 +671,10 @@ export function AddLiquidityModal(
           </div>
           <InputAmount
             className="w-full border border-transparent rounded"
-            max={toReadableNumber(tokens[1].decimals, balances[tokens[1].id])}
+            max={getMax(
+              tokens[1].id,
+              toReadableNumber(tokens[1].decimals, balances[tokens[1].id])
+            )}
             onChangeAmount={changeSecondTokenAmount}
             value={secondTokenAmount}
           />
