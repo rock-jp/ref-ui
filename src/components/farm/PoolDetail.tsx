@@ -668,7 +668,7 @@ export function PoolDetail({
     valueTitle?: string;
   }) => {
     return (
-      <div className="flex items-center flex-col justify-center text-sm">
+      <div className="flex items-center flex-col xs:flex-row  justify-center xs:justify-between text-sm xs:w-full">
         <span className="text-primaryText ">{title}</span>
 
         <span className="text-white" title={valueTitle}>
@@ -697,7 +697,7 @@ export function PoolDetail({
         </div>
       </div>
 
-      <div className="flex items-center justify-between w-full py-5">
+      <div className="flex items-center justify-between xs:flex-col w-full py-5">
         <DetailInfo
           title={<FormattedMessage id="fee" defaultMessage="Fee" />}
           value={`${calculateFeePercent(pool.fee)}%`}
