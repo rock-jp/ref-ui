@@ -788,13 +788,17 @@ export const addSimpleLiquidityPool = async (
   tokenIds: string[],
   fee: number
 ) => {
+  const ids = tokenIds.map((id) =>
+    id === 'NEAR' ? WRAP_NEAR_CONTRACT_ID : id
+  );
+
   const storageBalances = await Promise.all(
-    tokenIds.map((id) => ftGetStorageBalance(id, REF_FI_CONTRACT_ID))
+    ids.map((id) => ftGetStorageBalance(id, REF_FI_CONTRACT_ID))
   );
 
   const transactions: Transaction[] = storageBalances
     .reduce((acc, sb, i) => {
-      if (!sb || sb.total === '0') acc.push(tokenIds[i]);
+      if (!sb || sb.total === '0') acc.push(ids[i]);
       return acc;
     }, [])
     .map((id) => ({
@@ -807,7 +811,7 @@ export const addSimpleLiquidityPool = async (
     functionCalls: [
       {
         methodName: 'add_simple_pool',
-        args: { tokens: tokenIds, fee },
+        args: { tokens: ids, fee },
         amount: '0.05',
       },
     ],

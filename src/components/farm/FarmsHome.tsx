@@ -707,6 +707,7 @@ function FarmView(props: {
   const tokens = useTokens(token_account_ids) || [];
   const history = useHistory();
   const intl = useIntl();
+
   function getTotalApr() {
     let apr = 0;
     farms.forEach(function (item: any) {
@@ -876,12 +877,10 @@ function FarmView(props: {
     );
     let result: string = '';
     tokens.forEach((token: any) => {
-      const { id, decimals } = token;
+      const { id, decimals, icon } = unWrapToken(token, true);
       const tokenNum = toReadableNumber(decimals, minimumAmounts[id]);
       const itemHtml = `<div class="flex justify-between items-center h-8">
-                          <image class="w-5 h-5 rounded-full mr-7" src="${
-                            token.icon
-                          }"/>
+                          <image class="w-5 h-5 rounded-full mr-7" src="${icon}"/>
                           <label class="text-xs text-navHighLightText">${toInternationalCurrencySystem(
                             tokenNum,
                             3

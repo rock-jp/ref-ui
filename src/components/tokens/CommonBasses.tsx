@@ -12,7 +12,7 @@ interface CommonBassesProps {
   onClick: (token: TokenMetadata) => void;
 }
 const COMMON_BASSES = [
-  'wNEAR',
+  'NEAR',
   'REF',
   'SKYWARD',
   'OCT',
