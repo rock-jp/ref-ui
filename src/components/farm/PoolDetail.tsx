@@ -710,11 +710,7 @@ export function PoolDetail({
         <DetailInfo
           title={<FormattedMessage id="tvl" defaultMessage="TVL" />}
           value={`$ ${toInternationalCurrencySystem(poolTVL?.toString())}`}
-          valueTitle={
-            Number(poolTVL || '0') < 0.01
-              ? '< 0.01'
-              : toPrecision(poolTVL?.toString(), 0)
-          }
+          valueTitle={toPrecision(poolTVL?.toString() || '0', 0)}
         />
         <DetailInfo
           title={
