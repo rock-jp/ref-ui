@@ -192,7 +192,7 @@ export function FarmsPage() {
 
     if (isSignedIn) {
       Params = [
-        getStakedListByAccountId({}),
+        getStakedListByAccountId({}, 'old'),
         list_user_rewards({}),
         getTokenPriceList(),
         getSeeds({}),

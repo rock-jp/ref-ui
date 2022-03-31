@@ -114,9 +114,10 @@ export const getSeeds = async ({
   return seedDatas;
 };
 
-export const getStakedListByAccountId = async ({
-  accountId = getCurrentWallet().wallet.getAccountId(),
-}): Promise<Record<string, string>> => {
+export const getStakedListByAccountId = async (
+  { accountId = getCurrentWallet().wallet.getAccountId() },
+  farmChosen?: 'old' | 'new'
+): Promise<Record<string, string>> => {
   const stakedList = await refFarmViewFunction({
     methodName: 'list_user_seeds',
     args: { account_id: accountId },
@@ -142,9 +143,8 @@ export const getStakedListByAccountId = async ({
         .toString()
     );
   });
-
-  console.log(v2StakedList, stakedList, finalStakeList);
-
+  if (farmChosen === 'new') return v2StakedList;
+  if (farmChosen === 'old') return stakedList;
   return finalStakeList;
 };
 
