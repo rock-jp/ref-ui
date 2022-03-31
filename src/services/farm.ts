@@ -28,6 +28,7 @@ import {
   STORAGE_TO_REGISTER_WITH_MFT,
 } from '../services/creators/storage';
 import getConfig from './config';
+import { scientificNotationToString } from '../utils/numbers';
 import {
   getCurrentWallet,
   SENDER_WALLET_SIGNEDIN_STATE_KEY,
@@ -120,6 +121,29 @@ export const getStakedListByAccountId = async ({
     methodName: 'list_user_seeds',
     args: { account_id: accountId },
   });
+
+  const v2StakedList = await list_user_seed_info().then((res) => {
+    Object.keys(res).forEach((seed) => {
+      res[seed] = res[seed].amount;
+    });
+
+    return res;
+  });
+
+  const finalStakeSeedList = new Array(
+    ...new Set(Object.keys(stakedList).concat(Object.keys(v2StakedList)))
+  );
+
+  const finalStakeList = {};
+  finalStakeSeedList.forEach((seed) => {
+    finalStakeList[seed] = scientificNotationToString(
+      new BigNumber(stakedList[seed] || 0)
+        .plus(new BigNumber(v2StakedList[seed] || 0))
+        .toString()
+    );
+  });
+
+  console.log(v2StakedList, stakedList, finalStakeList);
 
   return stakedList;
 };
