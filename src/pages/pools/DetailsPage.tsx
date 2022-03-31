@@ -334,7 +334,7 @@ export function AddLiquidityModal(
     setCanDeposit(false);
     if (firstTokenAmountBN.isGreaterThan(firstTokenBalanceBN)) {
       setCanDeposit(true);
-      const { id, decimals } = tokens[0];
+      const { id, decimals } = unWrapToken(tokens[0]);
       const modalData: any = {
         token: tokens[0],
         action: 'deposit',
@@ -352,7 +352,7 @@ export function AddLiquidityModal(
       setCanDeposit(true);
       // setMessageId('deposit_to_add_liquidity');
       // setDefaultMessage('Deposit to Add Liquidity');
-      const { id, decimals } = tokens[1];
+      const { id, decimals } = unWrapToken(tokens[1]);
       const modalData: any = {
         token: tokens[1],
         action: 'deposit',
