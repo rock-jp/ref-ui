@@ -82,6 +82,7 @@ import OldInputAmount from '~components/forms/OldInputAmount';
 import { BigNumber } from 'bignumber.js';
 import getConfig from '~services/config';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
+import { unWrapToken } from '../../services/ft-contract';
 const config = getConfig();
 const STABLE_POOL_ID = config.STABLE_POOL_ID;
 interface SearchData {
@@ -821,7 +822,7 @@ function WithdrawView({
   const [priceData, setPriceData] = useState<Record<string, any>>({});
   useEffect(() => {
     ftGetTokenMetadata(data[0]).then((token) => {
-      setToken(token);
+      setToken(unWrapToken(token, true));
       const { id } = token;
       const price = tokenPriceList && tokenPriceList[id]?.price;
       let resultTotalPrice = '0';
@@ -1019,7 +1020,7 @@ function FarmView({
     let totalPrice = 0;
     mergeCommonRewardFarms.forEach((item: FarmInfo) => {
       const { rewardToken, rewardsPerWeek } = item;
-      const { id, icon } = rewardToken;
+      const { id, icon } = unWrapToken(rewardToken, true);
       let price = 0;
       if (tokenPriceMap[id] && tokenPriceMap[id] != 'N/A') {
         price = +rewardsPerWeek * +tokenPriceMap[id];
@@ -1048,7 +1049,7 @@ function FarmView({
     const rewardsList: any[] = [];
     mergeCommonRewardFarms.forEach((item: FarmInfo) => {
       const { rewardToken, userUnclaimedReward } = item;
-      const { id, icon } = rewardToken;
+      const { id, icon } = unWrapToken(rewardToken, true);
       let price = 0;
       if (tokenPriceMap[id] && tokenPriceMap[id] != 'N/A') {
         price = +userUnclaimedReward * +tokenPriceMap[id];
@@ -1246,9 +1247,10 @@ function FarmView({
     let result: string = '';
     mergeCommonRewardFarms.forEach((item: FarmInfo) => {
       const { rewardToken } = item;
+      const token = unWrapToken(rewardToken, true);
       const itemHtml = `<div class="flex justify-between items-center h-8">
-                          <image class="w-5 h-5 rounded-full mr-7" src="${rewardToken.icon}"/>
-                          <label class="text-xs text-navHighLightText">${rewardToken?.symbol}</label>
+                          <image class="w-5 h-5 rounded-full mr-7" src="${token.icon}"/>
+                          <label class="text-xs text-navHighLightText">${token?.symbol}</label>
                         </div>`;
       result += itemHtml;
     });
@@ -1258,11 +1260,13 @@ function FarmView({
     let icons: any[] = [];
     mergeCommonRewardFarms.forEach(function (item: FarmInfo) {
       const { farm_id, rewardToken } = item;
+      const token = unWrapToken(rewardToken);
+
       const icon = (
         <img
           key={farm_id}
           className="h-5 w-5 ml-1.5 my-px rounded-full"
-          src={rewardToken?.icon}
+          src={token?.icon}
         />
       );
       icons.push(icon);
@@ -1366,14 +1370,18 @@ function FarmView({
     return { tip: result, percentage };
   }
   if (!tokens || tokens.length < 2 || farmsIsLoading) return null;
-  const yourShare = calculateNumByShare(farmData, tokens);
+
+  const yourShare = calculateNumByShare(
+    farmData,
+    tokens.map((token) => unWrapToken(token, true))
+  );
   tokens.sort((a, b) => {
     if (a.symbol === 'wNEAR') return 1;
     if (b.symbol === 'wNEAR') return -1;
     return 0;
   });
   const images = tokens.map((token, index) => {
-    const { icon, id } = token;
+    const { icon, id } = unWrapToken(token, true);
     if (icon)
       return (
         <img
@@ -1396,7 +1404,7 @@ function FarmView({
     );
   });
   const symbols = tokens.map((token, index) => {
-    const { symbol } = token;
+    const { symbol } = unWrapToken(token, true);
     const hLine = index === tokens.length - 1 ? '' : '-';
     return `${toRealSymbol(symbol)}${hLine}`;
   });
@@ -1871,7 +1879,10 @@ function ActionModal(
   const [showTip, setShowTip] = useState<boolean>(false);
   const [showCalc, setShowCalc] = useState(false);
   const cardWidth = isMobile() ? '90vw' : '30vw';
-  const tokens = useTokens(farm?.tokenIds) || [];
+  let tokens = useTokens(farm?.tokenIds) || [];
+
+  tokens = tokens?.map((token) => unWrapToken(token, true));
+
   const [displayTokenData, setDisplayTokenData] = useState<Record<string, any>>(
     {}
   );

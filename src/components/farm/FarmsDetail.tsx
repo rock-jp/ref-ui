@@ -6,7 +6,7 @@ import StakeTab from '~components/farm/StakeTab';
 import PoolTab from '~components/farm/PoolTab';
 import { useHistory, useLocation } from 'react-router-dom';
 import { getPool } from '~services/indexer';
-import { ftGetTokenMetadata } from '../../services/ft-contract';
+import { ftGetTokenMetadata, unWrapToken } from '../../services/ft-contract';
 import { mftGetBalance } from '~services/mft-contract';
 import { getMftTokenId } from '~utils/token';
 import getConfig from '../../services/config';
@@ -58,9 +58,9 @@ export default function FarmsDetail(props: any) {
     let result = '';
     symbols.forEach((item: string, index: number) => {
       if (index == symbols.length - 1) {
-        result += item;
+        result += item === 'wNEAR' ? 'NEAR' : item;
       } else {
-        result += item + '-';
+        result += item === 'wNEAR' ? 'NEAR' : item + '-';
       }
     });
     return result;
@@ -68,12 +68,13 @@ export default function FarmsDetail(props: any) {
   const displayImgs = () => {
     const tokenList: any[] = [];
     (tokens || []).forEach((token: any) => {
+      const unWrapedToken = unWrapToken(token);
       tokenList.push(
         <label
-          key={token.id}
+          key={unWrapedToken.id}
           className={`h-11 w-11 rounded-full overflow-hidden border border-gradientFromHover -ml-1.5`}
         >
-          <img src={token.icon} className="w-full h-full"></img>
+          <img src={unWrapedToken.icon} className="w-full h-full"></img>
         </label>
       );
     });

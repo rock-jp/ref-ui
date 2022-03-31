@@ -48,7 +48,11 @@ import {
 } from '~services/pool';
 import { Checkbox, CheckboxSelected } from '~components/icon';
 import { ErrorTriangle } from '~components/icon/SwapRefresh';
-import { ftGetTokenMetadata, TokenMetadata } from '../../services/ft-contract';
+import {
+  ftGetTokenMetadata,
+  TokenMetadata,
+  unWrapToken,
+} from '../../services/ft-contract';
 import { useTokens, getDepositableBalance } from '~state/token';
 import math, { e } from 'mathjs';
 import { useWalletTokenBalances } from '../../state/token';
@@ -79,6 +83,7 @@ import {
   TVLType,
   useDayVolume,
 } from '~state/pool';
+import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
 const ONLY_ZEROS = /^0*\.?0*$/;
 
@@ -188,16 +193,16 @@ export default function PoolTab(props: any) {
 
   if (!(tokens && tokens.length > 0 && pool)) return null;
 
-  console.log(Number(shares) > 0, shares, showStakeTip);
-
   return (
     <>
-      <StakeTip
-        share={shares}
-        changeTab={switchTopTab}
-        display={showStakeTip}
-        setDisplay={setShowStakeTip}
-      />
+      {!hidden ? (
+        <StakeTip
+          share={shares}
+          changeTab={switchTopTab}
+          display={showStakeTip}
+          setDisplay={setShowStakeTip}
+        />
+      ) : null}
 
       <div className={hidden ? 'hidden' : ''}>
         <div
@@ -297,12 +302,16 @@ export default function PoolTab(props: any) {
 }
 export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
   // todo
-  const { pool, tokens } = props;
+  let { pool, tokens } = props;
+
+  tokens = tokens.map((token) => unWrapToken(token, true));
   const [firstTokenAmount, setFirstTokenAmount] = useState<string>('');
   const [secondTokenAmount, setSecondTokenAmount] = useState<string>('');
   const [messageId, setMessageId] = useState<string>('add_liquidity');
   const [defaultMessage, setDefaultMessage] = useState<string>('Add Liquidity');
-  const balances = useWalletTokenBalances(tokens.map((token) => token.id));
+  const balances = useWalletTokenBalances(
+    tokens.map((token) => unWrapToken(token).id)
+  );
   const [error, setError] = useState<Error>();
   const intl = useIntl();
   const [canSubmit, setCanSubmit] = useState<boolean>(false);
@@ -317,6 +326,8 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
   const { wallet } = getCurrentWallet();
 
   if (!balances) return null;
+
+  balances[WRAP_NEAR_CONTRACT_ID] = balances['NEAR'];
 
   const changeFirstTokenAmount = (amount: string) => {
     setError(null);
@@ -782,7 +793,10 @@ export function RemoveLiquidity(props: {
           <div className="flex items-center">
             {Object.entries(minimumAmounts).map(
               ([tokenId, minimumAmount], i) => {
-                const token = tokens.find((t) => t.id === tokenId);
+                const token = unWrapToken(
+                  tokens.find((t) => t.id === tokenId),
+                  true
+                );
 
                 const minAmountValue = toReadableNumber(
                   token.decimals,

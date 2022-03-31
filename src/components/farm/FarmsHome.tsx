@@ -61,7 +61,7 @@ import {
   percentLess,
   calculateFairShare,
 } from '../../utils/numbers';
-import { ftGetTokenMetadata } from '../../services/ft-contract';
+import { ftGetTokenMetadata, unWrapToken } from '../../services/ft-contract';
 import { BigNumber } from 'bignumber.js';
 import * as math from 'mathjs';
 import { useTokens } from '~state/token';
@@ -737,7 +737,7 @@ function FarmView(props: {
     const tempMap = {};
     farms.forEach((farm: any) => {
       const { rewardToken } = farm;
-      const { icon, id } = rewardToken;
+      const { icon, id } = unWrapToken(rewardToken, true);
       tempMap[id] = icon;
     });
     return Object.entries(tempMap);
@@ -820,13 +820,14 @@ function FarmView(props: {
     lastList.forEach((item: any) => {
       const { commonRewardToken, commonRewardTotalApr, pending, startTime } =
         item;
+      const token = unWrapToken(commonRewardToken, true);
       let itemHtml = '';
       if (pending) {
         const startDate = moment.unix(startTime).format('YYYY-MM-DD');
         const txt = intl.formatMessage({ id: 'start' });
         itemHtml = `<div class="flex justify-between items-center h-8">
           <image class="w-5 h-5 rounded-full mr-7" style="filter: grayscale(100%)" src="${
-            commonRewardToken.icon
+            token.icon
           }"/>
           <div class="flex flex-col items-end">
             <label class="text-xs text-farmText">${
@@ -837,9 +838,7 @@ function FarmView(props: {
       </div>`;
       } else {
         itemHtml = `<div class="flex justify-between items-center h-8">
-          <image class="w-5 h-5 rounded-full mr-7" src="${
-            commonRewardToken.icon
-          }"/>
+          <image class="w-5 h-5 rounded-full mr-7" src="${token.icon}"/>
           <label class="text-xs text-navHighLightText">${
             formatWithCommas(commonRewardTotalApr) + '%'
           }</label>
@@ -936,10 +935,11 @@ function FarmView(props: {
     lastList.forEach((item: any) => {
       const { commonRewardToken, commonRewardTotalRewardsPerWeek, pending } =
         item;
+      const token = unWrapToken(commonRewardToken, true);
       if (pending) {
         itemHtml = `<div class="flex justify-between items-center h-8">
                       <image class="w-5 h-5 rounded-full mr-7" style="filter: grayscale(100%)" src="${
-                        commonRewardToken.icon
+                        token.icon
                       }"/>
                       <label class="text-xs text-farmText">${formatWithCommas(
                         commonRewardTotalRewardsPerWeek
@@ -948,7 +948,7 @@ function FarmView(props: {
       } else {
         itemHtml = `<div class="flex justify-between items-center h-8">
                       <image class="w-5 h-5 rounded-full mr-7" src="${
-                        commonRewardToken.icon
+                        token.icon
                       }"/>
                       <label class="text-xs text-navHighLightText">${formatWithCommas(
                         commonRewardTotalRewardsPerWeek
@@ -1086,14 +1086,19 @@ function FarmView(props: {
           <div className="left flex items-center h-11">
             <span className="flex">
               {tokens.map((token, index) => {
+                const unWrapedtoken = unWrapToken(token, true);
+
                 return (
                   <label
-                    key={token.id}
+                    key={unWrapedtoken.id}
                     className={`h-11 w-11 rounded-full overflow-hidden border border-gradientFromHover ${
                       index != 0 ? '-ml-1.5' : ''
                     }`}
                   >
-                    <img src={token.icon} className="w-full h-full"></img>
+                    <img
+                      src={unWrapedtoken.icon}
+                      className="w-full h-full"
+                    ></img>
                   </label>
                 );
               })}
@@ -1105,7 +1110,7 @@ function FarmView(props: {
               className="flex items-center cursor-pointer text-white font-bold text-lg ml-4"
             >
               {tokens.map((token, index) => {
-                const { symbol } = token;
+                const { symbol } = unWrapToken(token, true);
                 const hLine = index === tokens.length - 1 ? '' : '-';
                 return `${toRealSymbol(symbol)}${hLine}`;
               })}

@@ -56,7 +56,7 @@ import {
 } from '~services/farm';
 import { Checkbox, CheckboxSelected } from '~components/icon';
 import { ErrorTriangle } from '~components/icon/SwapRefresh';
-import { ftGetTokenMetadata } from '../../services/ft-contract';
+import { ftGetTokenMetadata, unWrapToken } from '../../services/ft-contract';
 import { useTokens } from '~state/token';
 import { useHistory } from 'react-router-dom';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
@@ -616,7 +616,7 @@ function StakedList(props: any) {
         ).valueOf();
       });
       lastList.push({
-        commonRewardToken: arr[0].rewardToken,
+        commonRewardToken: unWrapToken(arr[0].rewardToken,true),
         totalUserUnclaimedReward: totalUserUnclaimedReward,
       });
     });
