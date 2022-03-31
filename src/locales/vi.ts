@@ -74,7 +74,7 @@ const vi = {
   details: 'Chi tiết',
   detail: 'Chi tiết',
   liquidity_pools: 'Bể thanh khoản',
-  minimum_tokens_out: 'Tối thiểu nhận được ',
+  minimum_tokens_out: 'Tối thiểu nhận ',
   pair: 'Cặp thanh khoản',
   tvl: 'TVL',
   search_pools: 'Tìm Pool',
@@ -414,5 +414,11 @@ const vi = {
   booster_change_reason: 'Booster will change due to appending time',
   initial_booster: 'Initial Booster',
   append_timing: 'Append timing',
+  input_greater_than_available_tokens: 'Đầu vào lớn hơn mã thông báo LP có sẵn',
+  go_to: 'Đi tới',
+  Go_to: 'Đi tới',
+  you_have: 'Bạn có',
+  stable_pool_to_add_liquidity_now:
+    'hồ bơi ổn định để thêm thanh khoản ngay bây giờ',
 };
 export default vi;

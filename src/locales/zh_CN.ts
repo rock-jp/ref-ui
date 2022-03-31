@@ -394,5 +394,10 @@ const zh_CN = {
   booster_change_reason: '增倍会因为追加的时间而发生改变',
   initial_booster: '初始增倍',
   append_timing: '追加时间',
+  input_greater_than_available_tokens: '你的输入大于可用流动性代币',
+  go_to: '去',
+  you_have: '你有',
+  Go_to: '去',
+  stable_pool_to_add_liquidity_now: '稳定池来添加流动性',
 };
 export default zh_CN;

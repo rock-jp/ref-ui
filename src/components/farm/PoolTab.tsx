@@ -105,7 +105,7 @@ function StakeTip({
     <div className="w-full py-6 bg-cardBg rounded-lg pl-8 mt-2 pr-6 xs:px-6 text-sm text-farmText flex items-center justify-between relative top-4 overflow-hidden">
       <div className="w-full bg-gradientFrom h-1.5 right-0 top-0 absolute"></div>
       <span>
-        <FormattedMessage id="you_have " defaultMessage="You have" />
+        <FormattedMessage id="you_have" defaultMessage="You have" />
         <span className="text-white mx-1">
           {toRoundedReadableNumber({
             decimals: 24,
@@ -691,11 +691,11 @@ export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
         </span>
       </div>
       {canDeposit ? (
-        <div className="flex items-center rounded-md mb-6 py-3 px-4 xs:px-2 border border-warnColor">
-          <label className="text-base text-warnColor xs:text-sm md:text-sm">
+        <div className="flex items-center rounded-md mb-6 py-3 px-4 xs:px-2 border border-warnColor text-sm">
+          <label className="text-warnColor ">
             <FormattedMessage id="oops" defaultMessage="Oops" />!
           </label>
-          <label className="ml-2.5 text-base text-warnColor xs:text-sm md:text-sm">
+          <label className="ml-2.5 text-warnColor ">
             <FormattedMessage id="you_do_not_have_enough" />{' '}
             {modal?.token?.symbol}.
           </label>
