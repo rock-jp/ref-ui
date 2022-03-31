@@ -142,6 +142,7 @@ export default function FarmsDetail(props: any) {
         detailData={detailData}
         tokenPriceList={tokenPriceList}
         hidden={topActiveTab == 'stake'}
+        switchTopTab={switchTopTab}
       ></PoolTab>
     </div>
   );

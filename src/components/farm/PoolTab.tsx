@@ -88,12 +88,12 @@ function StakeTip({
   share,
   display,
   setDisplay,
-  swichTab,
+  changeTab,
 }: {
   share: string;
   display: boolean;
   setDisplay: (show: boolean) => void;
-  swichTab: (e?: any) => void;
+  changeTab: (e?: any) => void;
 }) {
   console.log(display);
   return display ? (
@@ -114,7 +114,7 @@ function StakeTip({
         <span
           className="border-b border-gradientFrom border-opacity-60 text-gradientFrom cursor-pointer ml-1"
           onClick={() => {
-            swichTab('stake');
+            changeTab('stake');
           }}
         >
           <FormattedMessage id="STAKE" defaultMessage="STAKE" />
@@ -165,7 +165,7 @@ function PoolDetailMag({
 
 export default function PoolTab(props: any) {
   const history = useHistory();
-  const { detailData, tokenPriceList, hidden } = props;
+  const { detailData, tokenPriceList, hidden, switchTopTab } = props;
   // const poolId = history.location.pathname.split('-')[0];
   const poolId = detailData[0]?.pool?.id;
 
@@ -194,7 +194,7 @@ export default function PoolTab(props: any) {
     <>
       <StakeTip
         share={shares}
-        swichTab={switchTab}
+        changeTab={switchTopTab}
         display={showStakeTip}
         setDisplay={setShowStakeTip}
       />
