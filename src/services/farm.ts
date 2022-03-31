@@ -145,7 +145,7 @@ export const getStakedListByAccountId = async ({
 
   console.log(v2StakedList, stakedList, finalStakeList);
 
-  return stakedList;
+  return finalStakeList;
 };
 
 export const getLPTokenId = (farm_id: string) => {
