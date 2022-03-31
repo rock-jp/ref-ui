@@ -564,7 +564,7 @@ export function PoolDetail({
 
   if (!tokens) return <Loading />;
 
-  const unWrapedTokens = Object.values(tokens).map((t) => unWrapToken(t, true));
+  const unWrapedTokens = Object.values(tokens);
 
   const Header = () => {
     return (

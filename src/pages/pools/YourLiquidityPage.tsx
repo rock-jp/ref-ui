@@ -33,6 +33,7 @@ import { formatMessage } from '@formatjs/intl';
 import { TokenMetadata } from '~services/ft-contract';
 import { FarmDot } from '~components/icon';
 import { ShareInFarm } from '~components/layout/ShareInFarm';
+import { unWrapToken } from '../../services/ft-contract';
 import {
   getCurrentWallet,
   WalletContext,
@@ -225,7 +226,7 @@ export function YourLiquidityPage() {
 function PoolRow(props: { pool: any; balance: string }) {
   const { pool, shares, stakeList } = usePool(props.pool.id);
   const { balance } = props;
-  const tokens = useTokens(pool?.tokenIds);
+  let tokens = useTokens(pool?.tokenIds);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showFunding, setShowFunding] = useState(false);
   const [supportFarm, setSupportFarm] = useState<Number>();
@@ -254,6 +255,7 @@ function PoolRow(props: { pool: any; balance: string }) {
     .toLocaleString('fullwide', { useGrouping: false });
 
   if (!pool || !tokens || tokens.length < 2) return <div />;
+  tokens = tokens.map((token) => unWrapToken(token, true));
 
   if (!(userTotalShare.toNumber() > 0)) return null;
 

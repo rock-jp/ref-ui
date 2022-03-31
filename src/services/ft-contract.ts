@@ -136,9 +136,9 @@ export const ftGetTokenMetadata = async (
 };
 
 export const ftGetTokensMetadata = async (tokenIds: string[]) => {
-  const tokensMetadata = await Promise.all(
-    tokenIds.map((id: string) => ftGetTokenMetadata(id))
-  );
+  const tokensMetadata = (
+    await Promise.all(tokenIds.map((id: string) => ftGetTokenMetadata(id)))
+  ).map((token) => unWrapToken(token, true));
 
   return tokensMetadata.reduce((pre, cur, i) => {
     return {

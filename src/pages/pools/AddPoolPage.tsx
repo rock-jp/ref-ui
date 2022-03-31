@@ -18,10 +18,13 @@ import BigNumber from 'bignumber.js';
 import QuestionMark from '~components/farm/QuestionMark';
 import ReactTooltip from 'react-tooltip';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
+import { unWrapToken } from '../../services/ft-contract';
+import { useWalletTokenBalances } from '../../state/token';
 
 export function AddPoolPage() {
-  const tokens = useWhitelistTokens();
-  const balances = useTokenBalances();
+  let tokens = useWhitelistTokens();
+  tokens = tokens?.map((token) => unWrapToken(token));
+  const balances = useWalletTokenBalances(tokens?.map((tk) => tk.id) || []);
   const [token1, setToken1] = useState<TokenMetadata | null>(null);
   const [token2, setToken2] = useState<TokenMetadata | null>(null);
   const [fee, setFee] = useState('0.30');
