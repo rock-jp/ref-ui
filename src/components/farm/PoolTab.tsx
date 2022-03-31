@@ -57,12 +57,17 @@ import { isMobile } from '~utils/device';
 import { Card } from '~components/card/Card';
 import { WarnTriangle } from '~components/icon/SwapRefresh';
 import { ActionModel } from '~pages/AccountPage';
-import { FaAngleUp, FaAngleDown } from 'react-icons/fa';
+import { FaAngleUp, FaAngleDown, FaLeaf } from 'react-icons/fa';
 import { PoolDetail } from './PoolDetail';
-import { divide, scientificNotationToString } from '../../utils/numbers';
+import {
+  divide,
+  scientificNotationToString,
+  toRoundedReadableNumber,
+} from '../../utils/numbers';
 import { NewFarmPoolSlippageSelector } from '../forms/SlippageSelector';
 import { Icon } from '../../pages/pools/DetailsPage';
 import { StableSwapLogo } from '~components/icon/StableSwap';
+import { CloseIcon } from '../icon/Actions';
 import {
   useMonthTVL,
   useMonthVolume,
@@ -78,6 +83,53 @@ const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
 const ONLY_ZEROS = /^0*\.?0*$/;
 
 const REF_NEW_FARMING_POOL_TAB_KEY = 'REF_NEW_FARMING_POOL_TAB_VALUE';
+
+function StakeTip({
+  share,
+  display,
+  setDisplay,
+  swichTab,
+}: {
+  share: string;
+  display: boolean;
+  setDisplay: (show: boolean) => void;
+  swichTab: (e?: any) => void;
+}) {
+  console.log(display);
+  return display ? (
+    <div className="w-full py-6 bg-cardBg rounded-lg pl-8 mt-2 pr-6 xs:px-6 text-sm text-farmText flex items-center justify-between relative top-4 overflow-hidden">
+      <div className="w-full bg-gradientFrom h-1.5 right-0 top-0 absolute"></div>
+      <span>
+        <FormattedMessage id="you_have " defaultMessage="You have" />
+        <span className="text-white mx-1">
+          {toRoundedReadableNumber({
+            decimals: 24,
+            number: share,
+            precision: 2,
+          })}
+        </span>
+        <FormattedMessage id="lp_tokens" defaultMessage={'LP tokens'} />
+        {', '}
+        <FormattedMessage id="go_to" defaultMessage="go to" />
+        <span
+          className="border-b border-gradientFrom border-opacity-60 text-gradientFrom cursor-pointer ml-1"
+          onClick={() => {
+            swichTab('stake');
+          }}
+        >
+          <FormattedMessage id="STAKE" defaultMessage="STAKE" />
+        </span>
+      </span>
+
+      <span
+        className="pl-2 py-2 cursor-pointer"
+        onClick={() => setDisplay(false)}
+      >
+        <CloseIcon />
+      </span>
+    </div>
+  ) : null;
+}
 
 function PoolDetailMag({
   showReserves,
@@ -126,104 +178,121 @@ export default function PoolTab(props: any) {
     setActiveTab(tab);
   };
 
+  const [showStakeTip, setShowStakeTip] = useState<boolean>(Number(shares) > 0);
+
+  useEffect(() => {
+    setShowStakeTip(Number(shares) > 0);
+  }, [shares]);
+
   const [showReserves, setShowReserves] = useState(false);
 
   if (!(tokens && tokens.length > 0 && pool)) return null;
 
-  return (
-    <div className={hidden ? 'hidden' : ''}>
-      <div
-        className={` ${
-          poolId !== STABLE_POOL_ID ? 'hidden' : 'block'
-        } flex flex-col items-center justify-center mt-20 `}
-      >
-        <StableSwapLogo />
-        <span className="text-sm text-farmText mt-4">
-          <FormattedMessage id="go_to" defaultMessage="Go to" />{' '}
-          <span
-            className="text-gradientFrom border-b border-gradientFrom border-opacity-70 cursor-pointer"
-            onClick={() => {
-              history.push('/stableswap', { stableTab: 'add_liquidity' });
-            }}
-          >
-            [
-            <FormattedMessage id="sauce" defaultMessage="Sauce" />]
-          </span>{' '}
-          <FormattedMessage
-            id="stable_pool_to_add_liquidity_now"
-            defaultMessage="stable pool to add liquidity now"
-          />
-          .
-        </span>
-      </div>
+  console.log(Number(shares) > 0, shares, showStakeTip);
 
-      <div
-        className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 xs:px-6 pt-3 pb-16 ${
-          hidden || poolId === STABLE_POOL_ID ? 'hidden' : ''
-        }`}
-      >
-        <div className="tab relative flex mb-7">
-          <div
-            onClick={() => {
-              switchTab('add');
-            }}
-            className={`flex relative items-center w-1/2 text-lg py-3.5 justify-center cursor-pointer ${
-              activeTab == 'add' ? 'text-white' : 'text-primaryText'
-            }`}
-          >
-            <span>
-              <FormattedMessage id="add_liquidity" />
-            </span>
-            <div
-              className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
-                activeTab == 'add' ? 'bg-greenColor' : ''
-              }`}
-            ></div>
-          </div>
-          <div
-            onClick={() => {
-              switchTab('remove');
-            }}
-            className={`flex relative items-center w-1/2  text-lg py-3.5 cursor-pointer justify-center ${
-              activeTab == 'remove' ? 'text-white' : 'text-primaryText'
-            }`}
-          >
-            <span>
-              <FormattedMessage id="remove" />
-            </span>
-            <div
-              className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
-                activeTab == 'remove' ? 'bg-greenColor' : ''
-              }`}
-            ></div>
-          </div>
-          <div
-            className={`absolute w-full h-0.5 bottom-0 left-0 rounded-full bg-black bg-opacity-20`}
-          ></div>
-        </div>
-        <div
-          className={`operationArea ${
-            activeTab === 'add' ? 'block' : 'hidden'
-          }`}
-        >
-          <AddLiquidity pool={pool} tokens={tokens} />
-        </div>
-        <div
-          className={`operationArea ${
-            activeTab === 'remove' ? 'block' : 'hidden'
-          }`}
-        >
-          <RemoveLiquidity pool={pool} tokens={tokens} shares={shares} />
-        </div>
-      </div>
-      <PoolDetailMag
-        showReserves={showReserves}
-        setShowReserves={setShowReserves}
-        hidden={poolId === STABLE_POOL_ID}
+  return (
+    <>
+      <StakeTip
+        share={shares}
+        swichTab={switchTab}
+        display={showStakeTip}
+        setDisplay={setShowStakeTip}
       />
 
-      <PoolDetail pool={pool} showDetail={showReserves} />
-    </div>
+      <div className={hidden ? 'hidden' : ''}>
+        <div
+          className={` ${
+            poolId !== STABLE_POOL_ID ? 'hidden' : 'block'
+          } flex flex-col items-center justify-center mt-20 `}
+        >
+          <StableSwapLogo />
+          <span className="text-sm text-farmText mt-4">
+            <FormattedMessage id="go_to" defaultMessage="Go to" />{' '}
+            <span
+              className="text-gradientFrom border-b border-gradientFrom border-opacity-70 cursor-pointer"
+              onClick={() => {
+                history.push('/stableswap', { stableTab: 'add_liquidity' });
+              }}
+            >
+              [
+              <FormattedMessage id="sauce" defaultMessage="Sauce" />]
+            </span>{' '}
+            <FormattedMessage
+              id="stable_pool_to_add_liquidity_now"
+              defaultMessage="stable pool to add liquidity now"
+            />
+            .
+          </span>
+        </div>
+
+        <div
+          className={`poolBox relative mt-7 bg-cardBg rounded-2xl px-8 xs:px-6 pt-3 pb-16 ${
+            hidden || poolId === STABLE_POOL_ID ? 'hidden' : ''
+          }`}
+        >
+          <div className="tab relative flex mb-7">
+            <div
+              onClick={() => {
+                switchTab('add');
+              }}
+              className={`flex relative items-center w-1/2 text-lg py-3.5 justify-center cursor-pointer ${
+                activeTab == 'add' ? 'text-white' : 'text-primaryText'
+              }`}
+            >
+              <span>
+                <FormattedMessage id="add_liquidity" />
+              </span>
+              <div
+                className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
+                  activeTab == 'add' ? 'bg-greenColor' : ''
+                }`}
+              ></div>
+            </div>
+            <div
+              onClick={() => {
+                switchTab('remove');
+              }}
+              className={`flex relative items-center w-1/2  text-lg py-3.5 cursor-pointer justify-center ${
+                activeTab == 'remove' ? 'text-white' : 'text-primaryText'
+              }`}
+            >
+              <span>
+                <FormattedMessage id="remove" />
+              </span>
+              <div
+                className={`absolute w-full -bottom-px left-0 h-1  rounded-full ${
+                  activeTab == 'remove' ? 'bg-greenColor' : ''
+                }`}
+              ></div>
+            </div>
+            <div
+              className={`absolute w-full h-0.5 bottom-0 left-0 rounded-full bg-black bg-opacity-20`}
+            ></div>
+          </div>
+          <div
+            className={`operationArea ${
+              activeTab === 'add' ? 'block' : 'hidden'
+            }`}
+          >
+            <AddLiquidity pool={pool} tokens={tokens} />
+          </div>
+          <div
+            className={`operationArea ${
+              activeTab === 'remove' ? 'block' : 'hidden'
+            }`}
+          >
+            <RemoveLiquidity pool={pool} tokens={tokens} shares={shares} />
+          </div>
+        </div>
+        <PoolDetailMag
+          showReserves={showReserves}
+          setShowReserves={setShowReserves}
+          hidden={poolId === STABLE_POOL_ID}
+        />
+
+        <PoolDetail pool={pool} showDetail={showReserves} />
+      </div>
+    </>
   );
 }
 export function AddLiquidity(props: { pool: Pool; tokens: TokenMetadata[] }) {
