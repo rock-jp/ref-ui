@@ -7,6 +7,7 @@ import {
   CalcIcon,
   UpArrowIcon,
   SnakeImgLong,
+  SnakeImgLongBase64,
 } from '~components/icon/FarmV2';
 import {
   GradientButton,
@@ -149,13 +150,11 @@ export default function FarmsHome(props: any) {
     const sort_from_url = searchParams.get('sort');
     const status_from_url = searchParams.get('status');
     if (sort_from_url && sort_from_url !== sort) {
-      sort = sort_from_url;
       setSort(sort_from_url);
       searchData.sort = sort_from_url;
       search = true;
     }
     if (status_from_url && status_from_url !== status) {
-      status = status_from_url;
       setStatus(status_from_url);
       searchData.status = status_from_url;
       search = true;
@@ -589,12 +588,15 @@ export default function FarmsHome(props: any) {
     });
     return tempMap;
   }
+  const isMobileSite = isMobile();
   return (
     <div
-      className={`relative w-1/3 m-auto ${getUrlParams() ? 'hidden' : ''}`}
-      style={{ minWidth: '31rem' }}
+      className={`relative lg:w-1/3 xs:w-full md:w-full xs:px-5 md:px-5 m-auto ${
+        getUrlParams() ? 'hidden' : ''
+      }`}
+      style={{ minWidth: isMobileSite ? 'auto' : '31rem' }}
     >
-      <div className="title flex justify-center items-center text-3xl text-white mb-5">
+      <div className="title flex justify-center items-center text-3xl text-white mb-5 xs:-mt-4 md:-mt-4">
         <FormattedMessage id="farms"></FormattedMessage>
       </div>
       {user_reward_list && Object.keys(user_reward_list).length > 0 ? (
@@ -624,7 +626,7 @@ export default function FarmsHome(props: any) {
             );
           })}
         </div>
-        <div className="flex justify-between mt-5 items-start">
+        <div className="flex justify-between mt-5 items-start xs:flex-col md:flex-col">
           <div className="flex flex-wrap">
             {Object.keys(coinList).map((item: string) => {
               return (
@@ -644,7 +646,7 @@ export default function FarmsHome(props: any) {
               );
             })}
           </div>
-          <div className="flex items-center relative">
+          <div className="flex items-center relative xs:mt-3 xs:mb-5">
             <label className="text-farmText text-xs mr-2 whitespace-nowrap">
               <FormattedMessage id="sort_by" defaultMessage="Sort by" />
             </label>
@@ -1085,7 +1087,7 @@ function FarmView(props: {
         </div>
       ) : null}
       <div className="baseInfo pt-4 pl-6 pr-4 pb-3.5">
-        <div className="flex justify-between">
+        <div className="flex justify-between xs:flex-col md:flex-col">
           <div className="left flex items-center h-11">
             <span className="flex">
               {tokens.map((token, index) => {
@@ -1094,7 +1096,7 @@ function FarmView(props: {
                 return (
                   <label
                     key={unWrapedtoken.id}
-                    className={`h-11 w-11 rounded-full overflow-hidden border border-gradientFromHover ${
+                    className={`h-11 w-11 xs:h-9 xs:w-9 md:h-9 md:w-9 rounded-full overflow-hidden border border-gradientFromHover ${
                       index != 0 ? '-ml-1.5' : ''
                     }`}
                   >
@@ -1110,7 +1112,7 @@ function FarmView(props: {
               onClick={() => {
                 goFarmDetail(farms[0], 'p');
               }}
-              className="flex items-center cursor-pointer text-white font-bold text-lg ml-4"
+              className="flex items-center cursor-pointer text-white font-bold text-lg ml-4 xs:text-sm md:text-sm"
             >
               {tokens.map((token, index) => {
                 const { symbol } = unWrapToken(token, true);
@@ -1120,22 +1122,22 @@ function FarmView(props: {
               <RightArrowIcon className="ml-3" />
             </span>
           </div>
-          <div className="right flex flex-col items-end">
+          <div className="right flex flex-col items-end xs:flex-row md:flex-row xs:items-center md:items-end xs:mt-3 md:mt-3">
             {farms.length > 1 ? (
-              <span className="flex items-center bg-greenColor rounded h-5 px-2.5 text-black text-xs mb-3 character">
+              <span className="flex items-center bg-greenColor rounded h-5 px-2.5 text-black text-xs mb-3 character xs:mb-0 md:mb-0 xs:mr-3 md:mr-3">
                 <FormattedMessage id="multi_Rewards"></FormattedMessage>
                 <MultiIcon className="ml-1.5" />
               </span>
             ) : null}
             {Number(farms.multiple) > 0 ? (
-              <span className="flex items-center bg-greenColor rounded h-6 px-2.5 text-black text-xs character">
+              <span className="flex items-center bg-greenColor rounded h-6 px-2.5 text-black text-xs character xs:h-5 md:h-5">
                 x{farms.multiple}
               </span>
             ) : null}
           </div>
         </div>
-        <div className="flex items-center justify-between mt-4">
-          <span className="flex flex-col items-center">
+        <div className="flex items-center justify-between mt-4 xs:flex-col md:flex-col">
+          <span className="flex flex-col items-center xs:w-full md:w-full xs:flex-row md:flex-row xs:justify-between md:justify-between">
             <label className="text-farmText text-sm">
               <FormattedMessage id="total_staked"></FormattedMessage>
             </label>
@@ -1147,7 +1149,7 @@ function FarmView(props: {
               }`}
             </label>
           </span>
-          <span className="flex flex-col items-center">
+          <span className="flex flex-col items-center xs:w-full md:w-full xs:flex-row md:flex-row xs:justify-between md:justify-between">
             <span className="flex items-center">
               <label className="text-farmText text-sm">
                 <FormattedMessage id="apr"></FormattedMessage>
@@ -1179,7 +1181,7 @@ function FarmView(props: {
               />
             </div>
           </span>
-          <span className="flex flex-col items-center">
+          <span className="flex flex-col items-center xs:w-full md:w-full xs:flex-row md:flex-row xs:justify-between md:justify-between">
             <label className="text-farmText text-sm">
               <FormattedMessage id="rewards_week"></FormattedMessage>
             </label>
@@ -1228,9 +1230,9 @@ function FarmView(props: {
       {isSignedIn ? (
         <>
           {Number(farms[0].userStakedAmount) > 0 ? (
-            <div className="operateArea flex items-center justify-between bg-farmV2BoxBg px-6 py-3.5 h-20">
-              <div>
-                <div className="flex items-center text-sm text-farmText">
+            <div className="operateArea flex items-center justify-between bg-farmV2BoxBg px-6 py-3.5 h-20 xs:flex-col md:flex-col xs:h-auto md:h-auto">
+              <div className="xs:flex md:flex xs:justify-between md:justify-between xs:w-full md:w-full xs:mb-4 md:mb-4">
+                <div className="flex items-center text-sm text-farmText xs:justify-between md:justify-between">
                   <FormattedMessage id="my_shares" />
 
                   <div
@@ -1251,7 +1253,7 @@ function FarmView(props: {
                     />
                   </div>
                 </div>
-                <div className="flex items-center text-sm text-farmText">
+                <div className="flex items-center text-sm text-farmText xs:justify-between md:justify-between">
                   <FormattedMessage id="rewards" />
                   <div
                     className="text-white text-right"
@@ -1261,7 +1263,7 @@ function FarmView(props: {
                     data-html={true}
                     data-tip={getTotalUnclaimedRewardsTip()}
                   >
-                    <span className="text-white text-lg  mx-3">
+                    <span className="text-white text-lg  mx-3 xs:mr-0 md:mr-0">
                       {getTotalUnclaimedRewards()}
                     </span>
                     <ReactTooltip
@@ -1274,14 +1276,14 @@ function FarmView(props: {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center xs:justify-between md:justify-between xs:w-full md:w-full">
                 {isEnded() ? (
                   <GradientButton
                     onClick={() => {
                       goFarmDetail(farms[0], 's');
                     }}
                     color="#fff"
-                    className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold `}
+                    className={`w-34 xs:w-full md:w-full h-10 text-center text-base text-white focus:outline-none font-semibold `}
                   >
                     <FormattedMessage id="unstake" defaultMessage="Unstake" />
                   </GradientButton>
@@ -1291,7 +1293,7 @@ function FarmView(props: {
                       goFarmDetail(farms[0], 's');
                     }}
                     color="#fff"
-                    className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold `}
+                    className={`w-34 h-10 xs:w-full md:w-full text-center text-base text-white focus:outline-none font-semibold `}
                   >
                     <FormattedMessage id="stake" defaultMessage="Stake" />
                   </GradientButton>
@@ -1301,7 +1303,7 @@ function FarmView(props: {
                     color="#fff"
                     onClick={() => claimReward()}
                     disabled={claimLoading}
-                    className={`w-34 h-10 text-center text-base text-white focus:outline-none font-semibold ml-3 `}
+                    className={`w-34 h-10 xs:w-full md:w-full text-center text-base text-white focus:outline-none font-semibold ml-3 `}
                     loading={claimLoading}
                   >
                     <div>
@@ -1534,7 +1536,8 @@ function WithDrawBox(props: {
   return (
     <div className="flex flex-col relative rounded-xl overflow-hidden mb-3.5">
       <div className="relative">
-        <SnakeImgLong className="w-full"></SnakeImgLong>
+        {/* <img src={SnakeImgLongBase64()} className="w-full rounded-xl"></img> */}
+        <div className="snakeBase64Div" style={{ height: '56px' }}></div>
         <div className="absolute w-full h-full flex justify-between top-0 left-0 px-5">
           <div className="flex flex-col items-center">
             <span className="text-white text-xs bg-greenColor rounded-b-lg px-3 py-0.5">
@@ -1559,7 +1562,7 @@ function WithDrawBox(props: {
           </div>
         </div>
       </div>
-      <div className={`bg-cardBg -mt-2  ${showDetail ? '' : 'hidden'}`}>
+      <div className={`bg-cardBg ${showDetail ? '' : 'hidden'}`}>
         <div
           className={`bg-farmV2WithDrawBg pl-3 pr-6 max-h-96 overflow-auto pt-5`}
           ref={rewardRef}
@@ -1620,7 +1623,7 @@ function WithDrawBox(props: {
             {Object.keys(rewardList).length > withdrawNumber ? (
               <div className="flex items-center ">
                 <label className="mr-1 text-xs">
-                  <FormattedMessage id="all_5" />
+                  <FormattedMessage id="all_5_v2" />
                 </label>
                 <div
                   className="text-white text-right ml-1"

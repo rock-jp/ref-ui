@@ -410,5 +410,7 @@ const en_US = {
   initial_booster: 'Initial Booster',
   append_timing: 'Append timing',
   cd_limit: 'more than 16 cd account limit',
+  expired: 'Expired',
+  all_5_v2: '5 tokens/time',
 };
 export default en_US;

@@ -378,6 +378,7 @@ const zh_CN = {
   unstake_time: '解押时间',
   farm: '农场',
   reward_Token: '奖励币',
+  status: '状态',
   value_of_rewards: '奖励价值',
   Rewards: '奖励',
   free: '活期',
@@ -400,5 +401,7 @@ const zh_CN = {
   Go_to: '去',
   stable_pool_to_add_liquidity_now: '稳定池来添加流动性',
   cd_limit: '超过最多16个定期账户的限制',
+  expired: '过期',
+  all_5_v2: '5个代币/每次',
 };
 export default zh_CN;

@@ -398,6 +398,7 @@ const vi = {
   unstake_time: 'Unstake Time',
   farm: 'Farm',
   reward_Token: 'Reward Token',
+  status: 'Status',
   value_of_rewards: 'Value of Rewards',
   Rewards: 'Rewards',
   free: 'Free',
@@ -421,5 +422,7 @@ const vi = {
   stable_pool_to_add_liquidity_now:
     'hồ bơi ổn định để thêm thanh khoản ngay bây giờ',
   cd_limit: 'more than 16 cd account limit',
+  expired: 'Expired',
+  all_5_v2: '5 tokens/time',
 };
 export default vi;

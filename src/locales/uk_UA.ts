@@ -371,6 +371,7 @@ const uk_UA = {
   unstake_time: 'Unstake Time',
   farm: 'Farm',
   reward_Token: 'Reward Token',
+  status: 'Status',
   value_of_rewards: 'Value of Rewards',
   Rewards: 'Rewards',
   free: 'Free',
@@ -388,5 +389,7 @@ const uk_UA = {
   initial_booster: 'Initial Booster',
   append_timing: 'Append timing',
   cd_limit: 'more than 16 cd account limit',
+  expired: 'Expired',
+  all_5_v2: '5 tokens/time',
 };
 export default uk_UA;

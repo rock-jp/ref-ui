@@ -5,26 +5,8 @@ import { ArrowLeftIcon } from '~components/icon/FarmV2';
 import StakeTab from '~components/farm/StakeTab';
 import PoolTab from '~components/farm/PoolTab';
 import { useHistory, useLocation } from 'react-router-dom';
-import { getPool } from '~services/indexer';
-import { ftGetTokenMetadata, unWrapToken } from '../../services/ft-contract';
-import { mftGetBalance } from '~services/mft-contract';
-import { getMftTokenId } from '~utils/token';
+import { unWrapToken } from '../../services/ft-contract';
 import getConfig from '../../services/config';
-import {
-  toPrecision,
-  toReadableNumber,
-  toNonDivisibleNumber,
-  toInternationalCurrencySystem,
-  percent,
-  formatWithCommas,
-  percentLess,
-  calculateFairShare,
-} from '../../utils/numbers';
-import {
-  LP_TOKEN_DECIMALS,
-  LP_STABLE_TOKEN_DECIMALS,
-  withdrawAllReward,
-} from '../../services/m-token';
 import { useTokens } from '~state/token';
 const STABLE_POOL_ID = getConfig().STABLE_POOL_ID;
 const getInitTopActiveTab = (props: any): any => {
@@ -72,7 +54,7 @@ export default function FarmsDetail(props: any) {
       tokenList.push(
         <label
           key={unWrapedToken.id}
-          className={`h-11 w-11 rounded-full overflow-hidden border border-gradientFromHover -ml-1.5`}
+          className={`h-11 w-11 xs:h-9 xs:w-9 md:h-9 md:w-9 rounded-full overflow-hidden border border-gradientFromHover -ml-1.5`}
         >
           <img src={unWrapedToken.icon} className="w-full h-full"></img>
         </label>
@@ -93,21 +75,21 @@ export default function FarmsDetail(props: any) {
     });
   };
   return (
-    <div className={`m-auto lg:w-580px md:w-5/6 xs:w-11/12`}>
+    <div className={`m-auto lg:w-580px md:w-5/6 xs:w-11/12  xs:-mt-4 md:-mt-4`}>
       <div className="breadCrumbs flex items-center text-farmText text-base hover:text-white">
         <ArrowLeftIcon onClick={goBacktoFarms} className="cursor-pointer" />
         <label className="cursor-pointer" onClick={goBacktoFarms}>
           <FormattedMessage id="farms" />
         </label>
       </div>
-      <div className="pairTab flex justify-between items-center mt-7">
+      <div className="pairTab flex justify-between items-center mt-7 xs:mt-4 md:mt-4 xs:flex-col md:flex-col xs:items-start md:items-start">
         <div className="left flex items-center h-11 ml-3">
           <span className="flex">{displayImgs()}</span>
-          <span className="flex items-center cursor-pointer text-white font-bold text-xl ml-4">
+          <span className="flex items-center cursor-pointer text-white font-bold text-xl ml-4 xs:text-sm md:text-sm">
             {displaySymbols()}
           </span>
         </div>
-        <div className="flex items-center w-64 p-1 bg-cardBg rounded-2xl">
+        <div className="flex items-center w-64 p-1 bg-cardBg rounded-2xl xs:w-full md:w-full xs:mt-3 md:mt-3">
           <span
             onClick={() => {
               switchTopTab('pool');

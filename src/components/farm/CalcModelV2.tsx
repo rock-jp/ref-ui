@@ -402,13 +402,13 @@ export function CalcEle(props: {
     setSelecteDate(v);
   }
   function getMyShare() {
-    if (!lpTokenNum || new BigNumber(lpTokenNum).isEqualTo('0')) {
+    if (!lpTokenNumAmount || new BigNumber(lpTokenNumAmount).isEqualTo('0')) {
       return '- (-%)';
     }
-    const totalStake = new BigNumber(lpTokenNum).plus(
+    const totalStake = new BigNumber(lpTokenNumAmount).plus(
       farms[0].seedTotalStakedAmount
     );
-    let percent = new BigNumber(lpTokenNum)
+    let percent = new BigNumber(lpTokenNumAmount)
       .dividedBy(totalStake)
       .multipliedBy(100);
     let resultPercent;
@@ -418,10 +418,10 @@ export function CalcEle(props: {
       resultPercent = percent.toFixed(3, 1).toString();
     }
     let resultLpToken;
-    if (new BigNumber('0.001').isGreaterThan(lpTokenNum)) {
+    if (new BigNumber('0.001').isGreaterThan(lpTokenNumAmount)) {
       resultLpToken = '<0.001';
     } else {
-      resultLpToken = handleNumber(lpTokenNum);
+      resultLpToken = handleNumber(lpTokenNumAmount);
     }
     return (
       <span className="flex flex-wrap justify-end">
@@ -486,12 +486,12 @@ export function CalcEle(props: {
           <label className="text-sm text-farmText">
             <FormattedMessage id="stake_for"></FormattedMessage>
           </label>
-          <div className="flex items-center bg-black bg-opacity-20 rounded-2xl p-1 flex-grow ml-20">
+          <div className="flex items-center bg-black bg-opacity-20 rounded-2xl p-1">
             <span
               onClick={() => {
                 switchAccountType('free');
               }}
-              className={`flex items-center justify-center text-sm h-10 w-1/2 cursor-pointer ${
+              className={`flex items-center justify-center text-sm h-10 w-28 cursor-pointer ${
                 accountType == 'free'
                   ? 'bg-farmV2TabColor rounded-xl text-white'
                   : 'text-farmText'
@@ -503,7 +503,7 @@ export function CalcEle(props: {
               onClick={() => {
                 switchAccountType('cd');
               }}
-              className={`flex items-center justify-center  text-sm h-10 w-1/2 cursor-pointer ${
+              className={`flex items-center justify-center  text-sm h-10 w-28 cursor-pointer ${
                 accountType == 'cd'
                   ? 'bg-farmV2TabColor rounded-xl text-white'
                   : 'text-farmText'

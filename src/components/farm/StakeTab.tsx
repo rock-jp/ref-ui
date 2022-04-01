@@ -25,7 +25,6 @@ import { unstake_v2_free, unstake_v2_cd } from '~services/m-token';
 import { getMftTokenId } from '~utils/token';
 import getConfig from '../../services/config';
 import { BigNumber } from 'bignumber.js';
-import moment from 'moment';
 import {
   toPrecision,
   toReadableNumber,
@@ -40,16 +39,12 @@ import {
   stake_v2,
   LP_TOKEN_DECIMALS,
   LP_STABLE_TOKEN_DECIMALS,
-  withdrawAllReward,
 } from '../../services/m-token';
 import Alert from '~components/alert/Alert';
+import { isMobile } from '~utils/device';
 import {
   cdStrategy,
-  list_seeds_v2,
   get_cd_strategy,
-  get_user_seed_info_by_seedId,
-  get_seed_info_by_seedId,
-  list_farms_by_seed,
   list_user_cd_account,
   getServerTime,
   get_seed_info,
@@ -120,13 +115,15 @@ export default function StakeTab(props: any) {
   const farmsStatus = getFarmsStatus();
   return (
     <div className={`${hidden ? 'hidden' : ''}`}>
-      <div className={`takeBox relative mt-7 bg-cardBg rounded-2xl px-7 py-3`}>
+      <div
+        className={`takeBox relative mt-7 bg-cardBg rounded-2xl px-7 py-3 xs:mt-4 md:mt-4 xs:px-2 md:px-2`}
+      >
         <div className="tab relative flex mb-7">
           <div
             onClick={() => {
               switchTab('stake');
             }}
-            className={`relative items-center w-1/2 text-lg py-3.5  pl-20 cursor-pointer ${
+            className={`flex relative w-1/2 text-lg py-3.5  pl-20 cursor-pointer xs:pl-0 md:pl-0 xs:flex-col md:flex-col xs:items-center md:items-center ${
               farmsStatus == 'e' ? 'hidden' : 'flex'
             } ${activeTab == 'stake' ? 'text-white' : 'text-primaryText'}`}
           >
@@ -141,7 +138,7 @@ export default function StakeTab(props: any) {
             onClick={() => {
               switchTab('unstake');
             }}
-            className={`flex relative w-1/2 items-center text-lg py-3.5 pl-20 cursor-pointer ${
+            className={`flex relative w-1/2 items-center text-lg py-3.5 pl-20 cursor-pointer xs:pl-0 md:pl-0 xs:flex-col md:flex-col xs:items-center md:items-center ${
               !isSignedIn ? 'hidden' : ''
             } ${activeTab == 'unstake' ? 'text-white' : 'text-primaryText'}`}
           >
@@ -264,7 +261,10 @@ function StakeArea(props: any) {
   }, [user_cd_account_list, boosterSwitchOn]);
   const get_user_cd_account_list = async () => {
     const list = await list_user_cd_account();
-    set_ser_cd_account_list(list);
+    const availableList = list?.filter((cd: any) => {
+      if (+cd['seed_power'] > 0) return true;
+    });
+    set_ser_cd_account_list(availableList || []);
     setStakeButtonLoading(false);
   };
   const getStakeBalance = async (id: string) => {
@@ -649,7 +649,7 @@ function StakedList(props: any) {
         ).valueOf();
       });
       lastList.push({
-        commonRewardToken: unWrapToken(arr[0].rewardToken,true),
+        commonRewardToken: unWrapToken(arr[0].rewardToken, true),
         totalUserUnclaimedReward: totalUserUnclaimedReward,
       });
     });
@@ -691,7 +691,9 @@ function StakedList(props: any) {
       .multipliedBy(100);
     const vAmount = toPrecision(v, 6);
     let percentage = '';
-    if (new BigNumber(0.001).isGreaterThan(p)) {
+    if (p.isEqualTo(0)) {
+      percentage = '(0%)';
+    } else if (new BigNumber(0.001).isGreaterThan(p)) {
       percentage = '(<0.001%)';
     } else {
       percentage = `${toPrecision(p.toString(), 2)}%`;
@@ -773,15 +775,21 @@ function StakedList(props: any) {
     let result = '-';
     if (cd_strategy) {
       const { begin_sec, end_sec, seed_amount, seed_power } = item;
-      result = new BigNumber(seed_power).dividedBy(seed_amount).toFixed();
-      result = toPrecision(result.toString(), 6);
-      // const month = (new BigNumber(end_sec).minus(begin_sec)).dividedBy(30*24*60*60).toFixed();
-      // const targetCdStrategy = cd_strategy.find((m:any) => {
-      //   if (m.month == month) return true;
-      // })
-      // if (targetCdStrategy) {
-      //   result = targetCdStrategy.realRate;
-      // }
+      if (+seed_power > 0) {
+        result = new BigNumber(seed_power).dividedBy(seed_amount).toFixed();
+        result = toPrecision(result.toString(), 6);
+      } else {
+        const month = new BigNumber(end_sec)
+          .minus(begin_sec)
+          .dividedBy(30 * 24 * 60 * 60)
+          .toFixed();
+        const targetCdStrategy = cd_strategy.find((m: any) => {
+          if (m.month == month) return true;
+        });
+        if (targetCdStrategy) {
+          result = targetCdStrategy.realRate;
+        }
+      }
     }
     return result;
   };
@@ -840,7 +848,7 @@ function StakedList(props: any) {
   const isShowStakedList = seedUserInfo?.free || seedUserInfo?.cds?.length > 0;
   return (
     <div
-      className={`stakedBox relative bg-cardBg  px-7 py-3 ${
+      className={`stakedBox relative bg-cardBg  px-7 py-3 xs:px-2 md:px-2 ${
         activeTab == 'stake' ? 'rounded-2xl mt-3' : 'rounded-b-2xl -mt-9'
       }`}
     >
@@ -907,7 +915,9 @@ function StakedList(props: any) {
         return (
           <div
             key={index}
-            className="mt-3 px-3 pb-5 pt-px bg-black bg-opacity-20 rounded-lg"
+            className={`mt-3 px-3 pb-5 pt-px bg-black bg-opacity-20 rounded-lg ${
+              +item['seed_power'] > 0 ? '' : 'hidden'
+            }`}
           >
             <CommonLine title="my_shares">
               <span className="flex items-center">
@@ -919,8 +929,11 @@ function StakedList(props: any) {
                 {displayUnClaimedUi(item)}
               </div>
             </CommonLine>
-            <CommonLine title="stake_period">
-              <div className="flex items-center">
+            <CommonLine
+              title="stake_period"
+              style={{ alignItems: isMobile ? 'flex-start' : '' }}
+            >
+              <div className="flex items-center xs:flex-col md:flex-col xs:items-end md:items-end">
                 <div
                   className="text-white text-right"
                   data-class="reactTip"
@@ -931,7 +944,7 @@ function StakedList(props: any) {
                 >
                   <div
                     style={{ width: '210px', height: '5px' }}
-                    className="relative rounded-lg bg-darkBg mr-3.5"
+                    className="relative rounded-lg bg-darkBg mr-3.5 xs:mr-0 md:mr-0"
                     onMouseOver={() => {
                       setHoverLine(item.cd_account_id);
                     }}
@@ -956,7 +969,7 @@ function StakedList(props: any) {
                     effect="solid"
                   />
                 </div>
-                <span className="text-white text-sm">
+                <span className="text-white text-sm xs:mt-3 md:mt-3">
                   {displayProgress(item).text}
                 </span>
               </div>
@@ -1342,7 +1355,7 @@ function StakeModal(props: any) {
       </CommonLine>
       <CommonLine title="stake">
         <span className="flex items-center">
-          <label className="text-white text-lg">{amount}</label>
+          <label className="text-white text-lg">{toPrecision(amount, 6)}</label>
         </span>
       </CommonLine>
       <CommonLine title="stake_for">
@@ -1459,13 +1472,13 @@ function UnStakeModal(props: any) {
     let result: any = '-';
     switch (+status) {
       case 1:
-        result = 'Free';
+        result = <FormattedMessage id="free"></FormattedMessage>;
         break;
       case 2:
         result = <label className="text-redwarningColor">{txt}</label>;
         break;
       case 3:
-        result = 'expired';
+        result = <FormattedMessage id="expired"></FormattedMessage>;
         break;
       default:
         result = '-';
@@ -1556,12 +1569,12 @@ function UnStakeModal(props: any) {
       if (needToPayAmount < 0.001) {
         result.payAmout = '<0.001';
       } else {
-        result.payAmout = toPrecision(needToPayAmount.toString(), 3);
+        result.payAmout = '≈ ' + toPrecision(needToPayAmount.toString(), 3);
       }
       if (new BigNumber(restAmount).isLessThan(0.001)) {
         result.receivedAmount = '<0.001';
       } else {
-        result.receivedAmount = toPrecision(restAmount, 3);
+        result.receivedAmount = '≈ ' + toPrecision(restAmount, 3);
       }
     }
     return result;
@@ -1686,6 +1699,7 @@ function UnStakeModal(props: any) {
 }
 function CommonModal(props: any) {
   const { isOpen, onRequestClose, title } = props;
+  const cardWidth = isMobile() ? '90vw' : '30vw';
   return (
     <Modal
       isOpen={isOpen}
@@ -1702,8 +1716,12 @@ function CommonModal(props: any) {
       }}
     >
       <div
-        className="px-5 py-6 w-30vw rounded-2xl bg-cardBg"
-        style={{ border: '1px solid rgba(0, 198, 162, 0.5)' }}
+        className="px-5 xs:px-3 md:px-3 py-6 rounded-2xl bg-cardBg"
+        style={{
+          width: cardWidth,
+          maxHeight: '95vh',
+          border: '1px solid rgba(0, 198, 162, 0.5)',
+        }}
       >
         <div className="title flex items-center justify-between">
           <label className="text-white text-xl">
@@ -1746,7 +1764,7 @@ function StakeInputField(props: any) {
           placeholder="0.0"
           value={amount}
           onChange={({ target }) => changeAmount(target.value)}
-          className="text-white text-lg w-2/3 focus:outline-non appearance-none leading-tight"
+          className="text-white text-lg w-2/3 xs:w-3/5 md:w-3/5 focus:outline-non appearance-none leading-tight"
         ></input>
         <div className="flex items-center">
           <span
@@ -1757,7 +1775,7 @@ function StakeInputField(props: any) {
           >
             Max
           </span>
-          <label className="font-bold text-base text-white ml-2.5">
+          <label className="font-bold text-base text-white ml-2.5 xs:text-xs md:text-xs whitespace-nowrap">
             <FormattedMessage id="lp_Token"></FormattedMessage>
           </label>
         </div>
