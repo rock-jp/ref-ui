@@ -64,23 +64,20 @@ export default function Table({
           </tr>
         </thead>
         <tbody>
-          {tokens
-            .sort((a, b) => (a.id === 'NEAR' ? -1 : 1))
-            .filter(Boolean)
-            .map((token) => (
-              <Token
-                key={token.id}
-                token={token}
-                onClick={onClick}
-                // render={render}
-                sortBy={sortBy}
-                totalAmount={
-                  balances
-                    ? toReadableNumber(token.decimals, balances[token.id])
-                    : ''
-                }
-              />
-            ))}
+          {tokens.filter(Boolean).map((token) => (
+            <Token
+              key={token.id}
+              token={token}
+              onClick={onClick}
+              // render={render}
+              sortBy={sortBy}
+              totalAmount={
+                balances
+                  ? toReadableNumber(token.decimals, balances[token.id])
+                  : ''
+              }
+            />
+          ))}
         </tbody>
       </table>
     )
