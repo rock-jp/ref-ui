@@ -55,6 +55,7 @@ import { FilterIcon } from '../../components/icon/PoolFilter';
 import useMemo from 'react';
 import { TokenMetadata } from '../../services/ft-contract';
 import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
+import { scientificNotationToString } from '../../utils/numbers';
 
 const HIDE_LOW_TVL = 'REF_FI_HIDE_LOW_TVL';
 
@@ -417,7 +418,7 @@ function MobileLiquidityPage({
             ref={inputRef}
             className={`text-sm outline-none rounded w-full py-2 px-3`}
             placeholder={intl.formatMessage({
-              id: 'input_to_search',
+              id: 'token',
             })}
             value={tokenName}
             onChange={(evt) => {
@@ -596,7 +597,13 @@ function PoolRow({
           {calculateFeePercent(pool.fee)}%
         </div>
 
-        <div className="col-span-1 py-1">
+        <div
+          className="col-span-1 py-1"
+          title={toPrecision(
+            scientificNotationToString(pool.tvl.toString()),
+            0
+          )}
+        >
           ${toInternationalCurrencySystem(pool.tvl.toString())}
         </div>
 
@@ -790,7 +797,7 @@ function LiquidityPage_({
                 ref={inputRef}
                 className={`text-sm outline-none rounded w-full py-2 px-3`}
                 placeholder={intl.formatMessage({
-                  id: 'input_to_search',
+                  id: 'token',
                 })}
                 onChange={(evt) => {
                   onSearch(evt.target.value);

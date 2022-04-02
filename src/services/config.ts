@@ -59,7 +59,7 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         helperUrl: 'https://helper.mainnet.near.org',
         explorerUrl: 'https://explorer.mainnet.near.org',
         indexerUrl: 'https://indexer.ref-finance.net',
-        sodakiApiUrl: 'https://sodaki.com/api',
+        sodakiApiUrl: 'https://api.stats.ref.finance/api',
         blackList: process.env.FARM_BLACK_LIST || ['1371#3'],
         REF_FI_CONTRACT_ID:
           process.env.REF_FI_CONTRACT_ID || 'v2.ref-finance.near',
@@ -75,6 +75,7 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         POOL_TOKEN_REFRESH_INTERVAL:
           process.env.POOL_TOKEN_REFRESH_INTERVAL || 20,
         STABLE_POOL_ID: process.env.STABLE_POOL_ID || 1910,
+        POOLS_BLACK_LIST: process.env.POOLS_BLACK_LIST || [3020],
         STABLE_TOKEN_IDS: [
           'dac17f958d2ee523a2206206994597c13d831ec7.factory.bridge.near',
           'a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.factory.bridge.near',
@@ -97,7 +98,7 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         helperUrl: 'https://helper.testnet.near.org',
         explorerUrl: 'https://explorer.testnet.near.org',
         indexerUrl: 'https://dev-indexer.ref-finance.com',
-        sodakiApiUrl: 'https://sodaki.com/api',
+        sodakiApiUrl: 'https://api.stats.ref.finance/api',
         blackList: process.env.FARM_BLACK_LIST || ['1371#3'],
         REF_FI_CONTRACT_ID:
           process.env.REF_FI_CONTRACT_ID || 'exchange.ref-dev.testnet',
@@ -114,6 +115,7 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         POOL_TOKEN_REFRESH_INTERVAL:
           process.env.POOL_TOKEN_REFRESH_INTERVAL || 20,
         STABLE_POOL_ID: process.env.STABLE_POOL_ID || 79,
+        POOLS_BLACK_LIST: process.env.POOLS_BLACK_LIST || [506],
         STABLE_TOKEN_IDS: [
           'usdt.fakes.testnet',
           'usdc.fakes.testnet',
@@ -137,7 +139,7 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         helperUrl: 'https://helper.mainnet.near.org',
         explorerUrl: 'https://explorer.mainnet.near.org',
         indexerUrl: 'https://indexer.ref-finance.net',
-        sodakiApiUrl: 'https://sodaki.com/api',
+        sodakiApiUrl: 'https://api.stats.ref.finance/api',
         blackList: process.env.FARM_BLACK_LIST || ['1371#3'],
         REF_FI_CONTRACT_ID:
           process.env.REF_FI_CONTRACT_ID || 'v2.ref-finance.near',
@@ -153,6 +155,7 @@ export default function getConfig(env: string = process.env.NEAR_ENV) {
         POOL_TOKEN_REFRESH_INTERVAL:
           process.env.POOL_TOKEN_REFRESH_INTERVAL || 20,
         STABLE_POOL_ID: process.env.STABLE_POOL_ID || 1910,
+        POOLS_BLACK_LIST: process.env.POOLS_BLACK_LIST || [3020],
         STABLE_TOKEN_IDS: [
           'dac17f958d2ee523a2206206994597c13d831ec7.factory.bridge.near',
           'a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.factory.bridge.near',

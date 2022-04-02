@@ -404,7 +404,7 @@ const vi = {
   free: 'Free',
   lp_tokens: 'LP tokens',
   connect_to_wallet: 'Connect Wallet',
-  start: 'Start',
+  start: 'bắt đầu',
   anytime: 'Anytime',
   slash_policy_content:
     'Each seed has its own slash rate. And it will decreases linearly over time until be 0 at the unlock time of this CD Account.',
@@ -424,5 +424,10 @@ const vi = {
   cd_limit: 'more than 16 cd account limit',
   expired: 'Expired',
   all_5_v2: '5 tokens/time',
+  create: 'Tạo',
+  support_ledger: 'ủng hộ Ledger',
+  support_ledger_tip:
+    "Ở bản thiết kế ban đầu, Ledger<br /> không thể thực hiện số lượng lớn<br /> giao dịch cùng lúc(i.e. Auto Router:<br /> trao đổi qua nhiều pool trong một lần) <br />bởi vì sự giới hạn về bộ nhớ. Khi được<br /> kích hoạt, tuỳ chọn 'Support Ledger'<br /> sẽ giới hạn các giao dịch <br />tới sự đơn giản nhất (dù không có được <br />giá thành tốt nhất), nên các giao <br />dịch của có khối lượng hợp lí mới có thể<br /> được thực hiện",
+  aprTip: 'Giá trị được tính dựa trên tổng phần thưởng hiện có (chưa/đã nhận)',
 };
 export default vi;

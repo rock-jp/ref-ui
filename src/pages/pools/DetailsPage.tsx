@@ -101,8 +101,13 @@ import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
 
 import { useWalletTokenBalances } from '../../state/token';
 import { SmallWallet } from '../../components/icon/SmallWallet';
+<<<<<<< HEAD
 import { unWrapToken, wrapToken } from '../../services/ft-contract';
 import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
+=======
+import { scientificNotationToString } from '../../utils/numbers';
+import { POOLS_BLACK_LIST } from '../../services/near';
+>>>>>>> main
 interface ParamTypes {
   id: string;
 }
@@ -1378,8 +1383,10 @@ export function PoolDetailsPage() {
 
   if (!pool || !tokens || tokens.length < 2) return <Loading />;
   if (isStablePool(pool)) {
-    history.push('/stableswap');
+    history.push('/stableswap', { stableTab: 'stable_swap' });
   }
+
+  if (POOLS_BLACK_LIST.includes(pool.id)) history.push('/');
 
   return (
     <div>
@@ -1548,7 +1555,13 @@ export function PoolDetailsPage() {
                 <div>
                   <FormattedMessage id="tvl" defaultMessage="TVL" />
                 </div>
-                <div className="text-base text-white">
+                <div
+                  className="text-base text-white"
+                  title={toPrecision(
+                    scientificNotationToString(poolTVL?.toString() || '0'),
+                    0
+                  )}
+                >
                   {' '}
                   ${toInternationalCurrencySystem(poolTVL?.toString())}
                 </div>

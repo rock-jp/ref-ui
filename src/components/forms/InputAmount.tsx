@@ -3,6 +3,8 @@ import { FormattedMessage } from 'react-intl';
 import { TokenMetadata } from '~services/ft-contract';
 import { TokenBalancesView } from '~services/token';
 import { toPrecision } from '../../utils/numbers';
+import { tokenPrice } from './SelectToken';
+import { multiply } from '../../utils/numbers';
 
 interface InputAmountProps extends React.InputHTMLAttributes<HTMLInputElement> {
   max?: string;
@@ -12,6 +14,8 @@ interface InputAmountProps extends React.InputHTMLAttributes<HTMLInputElement> {
   tokenSymbol?: string | JSX.Element;
   balance?: string;
   title?: string;
+  forSwap?: boolean;
+  price?: string | null;
 }
 
 export default function InputAmount({
@@ -20,6 +24,8 @@ export default function InputAmount({
   onChangeAmount,
   disabled = false,
   maxBorder = true,
+  forSwap = false,
+  price,
   ...rest
 }: InputAmountProps) {
   const ref = useRef<HTMLInputElement>();
@@ -69,7 +75,7 @@ export default function InputAmount({
               setIsFocus(false);
             }}
           />
-          {max ? (
+          {max && !forSwap ? (
             <a
               className={`rounded border  items-center px-1 mr-2 m-auto focus:outline-none text-xs ${
                 disabled || max === rest.value
@@ -82,6 +88,8 @@ export default function InputAmount({
               MAX
             </a>
           ) : null}
+
+          {forSwap ? <span className="mr-3">{tokenPrice(price)}</span> : null}
         </div>
       </fieldset>
     </>

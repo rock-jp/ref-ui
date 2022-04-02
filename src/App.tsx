@@ -99,7 +99,12 @@ function App() {
       removeSenderLoginRes();
       window.history.replaceState({}, '', window.location.origin + pathname);
     }
-    if (pathname !== '/swap' && pathname !== '/stableswap' && pathname !== '/')
+    if (
+      pathname !== '/swap' &&
+      pathname !== '/stableswap' &&
+      pathname !== '/' &&
+      pathname !== '/pools/add'
+    )
       window.history.replaceState({}, '', window.location.origin + pathname);
   }, [errorType, signInErrorType]);
 
@@ -183,7 +188,6 @@ function App() {
             <Route path="/" component={AutoHeight(SwapPage)} />
           </Switch>
           <Footer />
-          <SwapGuide></SwapGuide>
           <PopUpSwiper></PopUpSwiper>
         </div>
       </Router>
