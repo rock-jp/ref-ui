@@ -83,6 +83,7 @@ import { SwapArrow, SwapExchange } from '../icon/Arrows';
 import { getPoolAllocationPercents } from '../../utils/numbers';
 import { DoubleCheckModal } from '../../components/layout/SwapDoubleCheck';
 import { getTokenPriceList } from '../../services/indexer';
+import { unWrapToken } from '../../services/ft-contract';
 
 const SWAP_IN_KEY = 'REF_FI_SWAP_IN';
 const SWAP_OUT_KEY = 'REF_FI_SWAP_OUT';
@@ -803,7 +804,10 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
           minAmountOut={minAmountOut}
           isParallelSwap={isParallelSwap}
           fee={avgFee}
-          swapsTodo={swapsToDo}
+          swapsTodo={swapsToDo?.map((todo) => ({
+            ...todo,
+            tokens: todo.tokens.map((t) => unWrapToken(t, true)),
+          }))}
           priceImpact={PriceImpactValue}
         />
         {swapError ? (
