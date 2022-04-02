@@ -234,10 +234,13 @@ export const estimateSwap = async ({
     );
 
   const throwNoPoolError = () => {
+    const { symbol: symbolIn } = unWrapToken(tokenIn);
+    const { symbol: symbolOut } = unWrapToken(tokenOut);
+
     throw new Error(
       `${intl.formatMessage({
         id: 'no_pool_available_to_make_a_swap_from',
-      })} ${tokenIn.symbol} -> ${tokenOut.symbol} ${intl.formatMessage({
+      })} ${symbolIn} -> ${symbolOut} ${intl.formatMessage({
         id: 'for_the_amount',
       })} ${amountIn} ${intl.formatMessage({
         id: 'no_pool_eng_for_chinese',
