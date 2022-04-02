@@ -1105,7 +1105,7 @@ function FarmView({
           diff_start_time_pending,
           no_pending,
         } = item;
-        const { id, icon } = rewardToken;
+        const { id, icon } = unWrapToken(rewardToken);
         // let price = 0;
         // if (tokenPriceMap[id] && tokenPriceMap[id] != 'N/A') {
         //   price = +rewardsPerWeek * +tokenPriceMap[id];
