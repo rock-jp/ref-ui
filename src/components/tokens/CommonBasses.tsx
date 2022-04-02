@@ -28,23 +28,16 @@ const COMMON_BASSES = [
   // 'FLX',
 ];
 
-<<<<<<< HEAD
-export default function CommonBasses({ tokens, onClick }: CommonBassesProps) {
-  const commonBassesTokens = tokens
-    .filter((item) => {
-      return COMMON_BASSES.indexOf(item?.symbol) > -1;
-    })
-    .sort((a, b) => (a.id === 'NEAR' ? -1 : 1));
-=======
 export default function CommonBasses({
   tokens,
   onClick,
   tokenPriceList,
 }: CommonBassesProps) {
-  const commonBassesTokens = tokens.filter((item) => {
-    return COMMON_BASSES.indexOf(item?.symbol) > -1;
-  });
->>>>>>> main
+  const commonBassesTokens = tokens
+    .filter((item) => {
+      return COMMON_BASSES.indexOf(item?.symbol) > -1;
+    })
+    .sort((a, b) => (a.id === 'NEAR' ? -1 : 1));
 
   return (
     <section className="px-6">

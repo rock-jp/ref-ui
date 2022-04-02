@@ -537,14 +537,11 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
     Number(localStorage.getItem(SWAP_SLIPPAGE_KEY) || urlSlippageTolerance) ||
       0.5
   );
-<<<<<<< HEAD
-=======
   const [tokenPriceList, setTokenPriceList] = useState<Record<string, any>>({});
 
   useEffect(() => {
     getTokenPriceList().then(setTokenPriceList);
   }, []);
->>>>>>> main
 
   useEffect(() => {
     const rememberedIn = urlTokenIn || localStorage.getItem(SWAP_IN_KEY);
@@ -613,37 +610,15 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
     supportLedger,
   });
 
-<<<<<<< HEAD
-  const priceImpactValueParallelSwap = useMemo(() => {
-    if (!pools || !tokenOutAmount || !tokenInAmount) return '0';
-    return calculatePriceImpact(
-      pools,
-      wrapToken(tokenIn),
-      wrapToken(tokenOut),
-      tokenInAmount
-    );
-  }, [swapsToDo]);
-
-  const priceImpactValueSmartRouting = useMemo(() => {
-    {
-      if (!swapsToDo || !tokenInAmount || isParallelSwap) return '0';
-      return calculateSmartRoutingPriceImpact(
-        tokenInAmount,
-        swapsToDo,
-        wrapToken(tokenIn),
-        swapsToDo[1].token,
-        wrapToken(tokenOut)
-      );
-=======
   const priceImpactValueSmartRouting = useMemo(() => {
     try {
       if (swapsToDo?.length === 2 && swapsToDo[0].status === PoolMode.SMART) {
         return calculateSmartRoutingPriceImpact(
           tokenInAmount,
           swapsToDo,
-          tokenIn,
+          wrapToken(tokenIn),
           swapsToDo[1].token,
-          tokenOut
+          wrapToken(tokenOut)
         );
       } else if (
         swapsToDo?.length === 1 &&
@@ -656,7 +631,6 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
       } else return '0';
     } catch {
       return '0';
->>>>>>> main
     }
   }, [tokenOutAmount, swapsToDo]);
 

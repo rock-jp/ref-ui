@@ -66,15 +66,12 @@ import { STABLE_LP_TOKEN_DECIMALS } from '../components/stableswap/AddLiquidity'
 //@ts-ignore
 import { getSmartRouteSwapActions, stableSmart } from './smartRouteLogic';
 import { getCurrentWallet } from '../utils/sender-wallet';
-<<<<<<< HEAD
 import {
   getNearDepositTransaction,
   getNearWithdrawTransaction,
 } from './wrap-near';
 import { wrapToken, unWrapToken } from './ft-contract';
-=======
 import { multiply } from '../utils/numbers';
->>>>>>> main
 
 // Big.strict = false;
 const FEE_DIVISOR = 10000;
@@ -666,8 +663,6 @@ SwapOptions) => {
     (estimate) => estimate.status === PoolMode.SMART
   );
 
-  console.log(swapsToDo);
-
   if (wallet.isSignedIn()) {
     if (isParallelSwap) {
       const swapActions = swapsToDo.map((s2d) => {
@@ -713,16 +708,11 @@ SwapOptions) => {
         receiverId: tokenIn.id,
         functionCalls: tokenInActions,
       });
-<<<<<<< HEAD
-    } else {
-      const tokenMid = swapsToDo[1].token;
-
-=======
 
       return executeMultipleTransactions(transactions);
     } else if (isSmartRouteV1Swap) {
       //making sure all actions get included for hybrid stable smart.
-      await registerToken(tokenOut);
+      // await registerToken(tokenOut);
       var actionsList = [];
       // let allSwapsTokens = swapsToDo.map((s) => [s.inputToken, s.outputToken]); // to get the hop tokens
       let amountInInt = new Big(amountIn)
@@ -772,7 +762,7 @@ SwapOptions) => {
       return executeMultipleTransactions(transactions);
     } else {
       //making sure all actions get included.
-      await registerToken(tokenOut);
+      // await registerToken(tokenOut);
       var actionsList = [];
       let allSwapsTokens = swapsToDo.map((s) => [s.inputToken, s.outputToken]); // to get the hop tokens
       for (var i in allSwapsTokens) {
@@ -820,7 +810,6 @@ SwapOptions) => {
         }
       }
 
->>>>>>> main
       transactions.push({
         receiverId: tokenIn.id,
         functionCalls: [

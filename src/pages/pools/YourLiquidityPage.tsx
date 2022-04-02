@@ -33,14 +33,11 @@ import { formatMessage } from '@formatjs/intl';
 import { TokenMetadata } from '~services/ft-contract';
 import { FarmDot } from '~components/icon';
 import { ShareInFarm } from '~components/layout/ShareInFarm';
-<<<<<<< HEAD
 import { unWrapToken } from '../../services/ft-contract';
-=======
 import { usePoolTVL } from '../../state/pool';
 import { multiply, divide } from '../../utils/numbers';
 import { STABLE_POOL_ID } from '../../services/near';
 import { getStablePoolFromCache, isNotStablePool } from '../../services/pool';
->>>>>>> main
 import {
   getCurrentWallet,
   WalletContext,
@@ -246,15 +243,10 @@ export function YourLiquidityPage() {
 
 function PoolRow(props: { pool: any }) {
   const { pool, shares, stakeList } = usePool(props.pool.id);
-<<<<<<< HEAD
-  const { balance } = props;
-  let tokens = useTokens(pool?.tokenIds);
-=======
 
   const poolTVL = usePoolTVL(props.pool.id);
 
-  const tokens = useTokens(pool?.tokenIds);
->>>>>>> main
+  let tokens = useTokens(pool?.tokenIds);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showFunding, setShowFunding] = useState(false);
   const [supportFarm, setSupportFarm] = useState<Number>();
