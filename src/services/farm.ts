@@ -634,6 +634,8 @@ export const list_user_cd_account = async (
   return refFarmV2ViewFunction({
     methodName: 'list_user_cd_account',
     args: { account_id: accountId, from_index: 0, limit: 100 },
+  }).catch(() => {
+    return [];
   });
 };
 export const getServerTime = async () => {

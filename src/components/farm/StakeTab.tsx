@@ -84,7 +84,7 @@ export default function StakeTab(props: any) {
     setServerTime(serverTime);
   };
   const get_cd_strategy_list = async () => {
-    const { seed_slash_rate, stake_strategy = [] } = await get_cd_strategy();
+    const { stake_strategy = [] } = await get_cd_strategy();
     const goldList = [
       <GoldLevel1></GoldLevel1>,
       <GoldLevel2></GoldLevel2>,
@@ -672,12 +672,14 @@ function StakedList(props: any) {
         const { seed_amount } = item;
         freeAmount = freeAmount.minus(seed_amount);
       });
-      seedUserInfoOriginData.free = {
-        seed_amount: freeAmount.toFixed(),
-        seed_power: freeAmount.toFixed(),
-        seed_id,
-        isFree: true,
-      };
+      if (freeAmount.isGreaterThan(0)) {
+        seedUserInfoOriginData.free = {
+          seed_amount: freeAmount.toFixed(),
+          seed_power: freeAmount.toFixed(),
+          seed_id,
+          isFree: true,
+        };
+      }
       return seedUserInfoOriginData;
     }
   };
@@ -1326,7 +1328,7 @@ function StakeModal(props: any) {
     setStakeLoading(true);
     const DECIMALS =
       STABLE_POOL_ID == pool.id ? LP_STABLE_TOKEN_DECIMALS : LP_TOKEN_DECIMALS;
-    const cdIndex = user_cd_account_list.length;
+    const cdIndex = getFreeCdIndex();
     const strategyIndex = strategy.index;
     let msg = '';
     if (boosterSwitchOn) {
@@ -1342,6 +1344,21 @@ function StakeModal(props: any) {
       setError(err);
       setStakeLoading(false);
     });
+  }
+  function getFreeCdIndex() {
+    const allUsedIndex = new Set();
+    user_cd_account_list.forEach((cd: any) => {
+      const { cd_account_id } = cd;
+      allUsedIndex.add(cd_account_id);
+    });
+    let target;
+    for (let i = 0; i < MAX_CD_ACCOUNT_NUMBER; i++) {
+      if (!allUsedIndex.has(i)) {
+        target = i;
+        break;
+      }
+    }
+    return target;
   }
   return (
     <CommonModal {...props}>
