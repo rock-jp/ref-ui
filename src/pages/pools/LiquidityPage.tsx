@@ -53,7 +53,7 @@ import { useInView } from 'react-intersection-observer';
 import { QuestionTip } from '~components/layout/TipWrapper';
 import { FilterIcon } from '../../components/icon/PoolFilter';
 import useMemo from 'react';
-import { TokenMetadata } from '../../services/ft-contract';
+import { TokenMetadata, unWrapToken } from '../../services/ft-contract';
 import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
 import { scientificNotationToString } from '../../utils/numbers';
 
@@ -166,7 +166,7 @@ function MobilePoolRow({
 
   if (!curRowTokens) return <></>;
 
-  tokens = curRowTokens;
+  tokens = curRowTokens.map((token) => unWrapToken(token, true));
 
   tokens.sort((a, b) => {
     if (a.symbol === 'wNEAR') return 1;
@@ -547,7 +547,7 @@ function PoolRow({
 
   if (!curRowTokens) return <></>;
 
-  tokens = curRowTokens;
+  tokens = curRowTokens.map((token) => unWrapToken(token, true));
 
   tokens.sort((a, b) => {
     if (a.symbol === 'wNEAR') return 1;
