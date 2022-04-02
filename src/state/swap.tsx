@@ -169,7 +169,10 @@ export const useSwap = ({
 
             if (!loadingTrigger) {
               setTokenOutAmount(
-                getExpectedOutputFromActions(estimates, tokenOut.id).toString()
+                getExpectedOutputFromActions(
+                  estimates,
+                  wrapToken(tokenOut).id
+                ).toString()
               );
               setSwapsToDo(estimates);
               setCanSwap(true);

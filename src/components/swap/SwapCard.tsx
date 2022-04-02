@@ -83,7 +83,7 @@ import { SwapArrow, SwapExchange } from '../icon/Arrows';
 import { getPoolAllocationPercents } from '../../utils/numbers';
 import { DoubleCheckModal } from '../../components/layout/SwapDoubleCheck';
 import { getTokenPriceList } from '../../services/indexer';
-import { unWrapToken } from '../../services/ft-contract';
+import { unWrapToken, wrapToken } from '../../services/ft-contract';
 
 const SWAP_IN_KEY = 'REF_FI_SWAP_IN';
 const SWAP_OUT_KEY = 'REF_FI_SWAP_OUT';
@@ -637,7 +637,10 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
 
   const priceImpactValueSmartRoutingV2 = useMemo(() => {
     try {
-      const pi = calculateSmartRoutesV2PriceImpact(swapsToDo, tokenOut.id);
+      const pi = calculateSmartRoutesV2PriceImpact(
+        swapsToDo,
+        wrapToken(tokenOut).id
+      );
 
       return pi;
     } catch {
