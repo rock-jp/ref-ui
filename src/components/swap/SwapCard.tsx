@@ -10,6 +10,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import {
   ftGetBalance,
   TokenMetadata,
+  unWrapToken,
   wrapToken,
 } from '../../services/ft-contract';
 import { Pool } from '../../services/pool';
@@ -83,7 +84,8 @@ import { SwapArrow, SwapExchange } from '../icon/Arrows';
 import { getPoolAllocationPercents } from '../../utils/numbers';
 import { DoubleCheckModal } from '../../components/layout/SwapDoubleCheck';
 import { getTokenPriceList } from '../../services/indexer';
-import { unWrapToken, wrapToken } from '../../services/ft-contract';
+import { WRAP_NEAR_CONTRACT_ID } from '~services/wrap-near';
+import { unwrapNear } from '../../services/wrap-near';
 
 const SWAP_IN_KEY = 'REF_FI_SWAP_IN';
 const SWAP_OUT_KEY = 'REF_FI_SWAP_OUT';
@@ -544,6 +546,8 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
     getTokenPriceList().then(setTokenPriceList);
   }, []);
 
+  console.log(tokenPriceList);
+
   useEffect(() => {
     const rememberedIn = urlTokenIn || localStorage.getItem(SWAP_IN_KEY);
     const rememberedOut = urlTokenOut || localStorage.getItem(SWAP_OUT_KEY);
@@ -764,7 +768,10 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
           onChangeAmount={(amount) => {
             setTokenInAmount(amount);
           }}
-          tokenPriceList={tokenPriceList}
+          tokenPriceList={{
+            ...tokenPriceList,
+            ['NEAR']: tokenPriceList[WRAP_NEAR_CONTRACT_ID],
+          }}
           isError={tokenIn?.id === tokenOut?.id}
         />
         <div
