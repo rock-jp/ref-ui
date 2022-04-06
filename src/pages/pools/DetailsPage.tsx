@@ -161,7 +161,12 @@ export const GetExchangeRate = ({
   );
   const rate = Number(second_token_num) / Number(first_token_num);
 
-  const showRate = rate < 0.01 ? '< 0.01' : rate.toPrecision(2);
+  const showRate =
+    rate < 0.01
+      ? '< 0.01'
+      : rate.toString().indexOf('e') !== -1
+      ? rate.toPrecision(3)
+      : rate.toFixed(2);
 
   return Number(first_token_num) === 0 ? (
     <div className="px-1 border border-transparent">&nbsp;</div>
