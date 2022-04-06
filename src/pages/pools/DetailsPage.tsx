@@ -161,7 +161,7 @@ export const GetExchangeRate = ({
   );
   const rate = Number(second_token_num) / Number(first_token_num);
 
-  const showRate = rate < 0.01 ? '< 0.01' : rate.toFixed(2);
+  const showRate = rate < 0.01 ? '< 0.01' : rate.toPrecision(2);
 
   return Number(first_token_num) === 0 ? (
     <div className="px-1 border border-transparent">&nbsp;</div>
@@ -501,18 +501,6 @@ export function AddLiquidityModal(
                 defaultMessage="Add Liquidity"
               />
             </div>
-            {/* <p className="text-xs text-primaryText">
-              <a
-                className="underline cursor-pointer"
-                onClick={() => {
-                  window.open('/account');
-                }}
-              >
-                <FormattedMessage id="deposit"></FormattedMessage>
-              </a>
-              &nbsp;
-              <FormattedMessage id="deposit_into_ref_account" />
-            </p> */}
           </div>
           <div
             className="ml-2 cursor-pointer p-1"
@@ -704,14 +692,6 @@ export function AddLiquidityModal(
                 {modal?.token?.symbol}！
               </label>
             </div>
-            {/* <SolidButton
-              className="focus:outline-none px-3 py-1.5 text-sm"
-              onClick={() => {
-                setVisible(true);
-              }}
-            >
-              <FormattedMessage id="deposit" />
-            </SolidButton> */}
           </div>
         ) : null}
         <div className="flex justify-between text-primaryText text-sm my-6">
