@@ -690,9 +690,9 @@ export default function SwapCard(props: { allTokens: TokenMetadata[] }) {
   const getMax = function (id: string, amount: string) {
     return id !== 'NEAR'
       ? amount
-      : Number(amount) <= 1
+      : Number(amount) <= 0.5
       ? '0'
-      : String(Number(amount) - 1);
+      : String(Number(amount) - 0.5);
   };
 
   return (
