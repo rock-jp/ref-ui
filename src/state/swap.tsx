@@ -1,4 +1,11 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'react-toastify';
 import { getPool, Pool, StablePool, getStablePool } from '../services/pool';
 import BigNumber from 'bignumber.js';
@@ -553,16 +560,18 @@ export const useCrossSwap = ({
     };
   }, [count, loadingTrigger, loadingPause, requested]);
 
-  const makeSwap = (useNearBalance: boolean) => {
-    swap({
-      slippageTolerance,
-      swapsToDo,
-      tokenIn,
-      amountIn: tokenInAmount,
-      tokenOut,
-      useNearBalance,
-    }).catch(setSwapError);
-  };
+  const makeSwap = useCallback(() => {
+    (useNearBalance: boolean) => {
+      swap({
+        slippageTolerance,
+        swapsToDo,
+        tokenIn,
+        amountIn: tokenInAmount,
+        tokenOut,
+        useNearBalance,
+      }).catch(setSwapError);
+    };
+  }, [slippageTolerance, swapsToDo, tokenIn, tokenInAmount, tokenOut]);
 
   return {
     canSwap,

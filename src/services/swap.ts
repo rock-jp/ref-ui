@@ -1227,15 +1227,15 @@ SwapOptions) => {
       });
     }
 
-    if (tokenOut.id !== swapsToDo[swapsToDo.length - 1].outputToken) {
-      alert(
-        `token out from estimates: ${
-          swapsToDo[swapsToDo.length - 1].outputToken
-        }; tokenout you select ${tokenOut.id}`
-      );
+    // if (tokenOut.id !== swapsToDo[swapsToDo.length - 1].outputToken) {
+    //   alert(
+    //     `token out from estimates: ${
+    //       swapsToDo[swapsToDo.length - 1].outputToken
+    //     }; tokenout you select ${tokenOut.id}`
+    //   );
 
-      return window.location.reload();
-    }
+    //   return window.location.reload();
+    // }
 
     return executeMultipleTransactions(transactions);
   }
