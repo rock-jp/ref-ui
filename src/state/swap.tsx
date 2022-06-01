@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getPool, Pool, StablePool, getStablePool } from '../services/pool';
 import BigNumber from 'bignumber.js';
@@ -94,9 +94,7 @@ export const useSwap = ({
   const [canSwap, setCanSwap] = useState<boolean>();
   const [tokenOutAmount, setTokenOutAmount] = useState<string>('');
   const [swapError, setSwapError] = useState<Error>();
-  // const [swapsToDo, setSwapsToDo] = useState<EstimateSwapView[]>();
-
-  let swapsToDo: EstimateSwapView[];
+  const [swapsToDo, setSwapsToDo] = useState<EstimateSwapView[]>();
 
   const [avgFee, setAvgFee] = useState<number>(0);
 
@@ -195,9 +193,7 @@ export const useSwap = ({
               ).toString();
 
               setTokenOutAmount(expectedOut);
-              // setSwapsToDo(estimates);
-
-              swapsToDo = estimates;
+              setSwapsToDo(estimates);
               setCanSwap(true);
             }
           }
