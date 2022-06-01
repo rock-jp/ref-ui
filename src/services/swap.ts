@@ -1228,7 +1228,7 @@ SwapOptions) => {
     }
 
     if (tokenOut.id !== swapsToDo[swapsToDo.length - 1].outputToken)
-      window.location.reload();
+      return window.location.reload();
 
     return executeMultipleTransactions(transactions);
   }
