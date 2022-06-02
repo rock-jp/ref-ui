@@ -96,7 +96,7 @@ export const REF_FARM_CONTRACT_ID = config.REF_FARM_CONTRACT_ID;
 export const REF_AIRDRAOP_CONTRACT_ID = config.REF_AIRDROP_CONTRACT_ID;
 
 export const REF_TOKEN_ID = config.REF_TOKEN_ID;
-const XREF_TOKEN_ID = getConfig().XREF_TOKEN_ID;
+export const XREF_TOKEN_ID = getConfig().XREF_TOKEN_ID;
 
 export const LP_STORAGE_AMOUNT = '0.01';
 

@@ -82,7 +82,7 @@ import {
 } from './utils/sender-wallet';
 import StableSwapPageUSN from '~pages/stable/StableSwapPageUSN';
 import { checkTransaction } from './services/swap';
-import { swapToast, usePopUp } from './components/layout/transactionTipPopUp';
+import { usePopUp } from './components/layout/transactionTipPopUp';
 import { StableSwapRouter } from './pages/stable/StableSwapRouter';
 import { useSenderWallet } from './utils/sender-wallet';
 

@@ -9,6 +9,8 @@ import { getCurrentWallet } from '~utils/sender-wallet';
 import { senderSignedInToast } from './senderSignInPopUp';
 import { removeSenderLoginRes } from '../../utils/sender-wallet';
 import { useHistory } from 'react-router-dom';
+import { XREF_TOKEN_ID } from '../../services/near';
+import { REF_FI_ACCOUNT_PAGE_WITHDRAW } from '../../services/token';
 
 export enum TRANSACTION_WALLET_TYPE {
   NEAR_WALLET = 'transactionHashes',
@@ -64,10 +66,11 @@ export const swapToast = (txHash: string, tip?: JSX.Element | string) => {
         lineHeight: '48px',
       }}
     >
-      <FormattedMessage
-        id="swap_successful_click_to_view"
-        defaultMessage="Swap successful. Click to view"
-      />
+      {tip}
+      &nbsp;
+      <FormattedMessage id="successful" defaultMessage="successful" />
+      .&nbsp;
+      <FormattedMessage id="click_to_view" defaultMessage="Click to view" />
     </a>,
     {
       autoClose: 8000,
@@ -124,6 +127,57 @@ export const failToast = (txHash: string, errorType?: string) => {
       },
     }
   );
+};
+
+export const TranslationWrapper = (text: string) => (
+  <FormattedMessage id={text} />
+);
+
+export const methodNameParser = (parsedMethodName: string) => {
+  switch (parsedMethodName) {
+    case 'add_simple_pool':
+      return TranslationWrapper('create_pool');
+
+    // unstake on farms page
+    case 'withdraw_seed':
+      return TranslationWrapper('unstake');
+
+    // unstake xref
+    case 'unstake':
+      return TranslationWrapper('unstake');
+
+    // farm stake
+    case 'mft_transfer_call':
+      return TranslationWrapper('stake');
+
+    // stake xref
+    case 'stake':
+      return TranslationWrapper('stake');
+
+    case 'buy':
+      return TranslationWrapper('trading');
+
+    case 'sell':
+      return TranslationWrapper('trading');
+
+    case 'add_stable_liquidity':
+      return TranslationWrapper('add_liquidity');
+
+    case 'add_liquidity':
+      return TranslationWrapper('add_liquidity');
+
+    case 'remove_liquidity':
+      return TranslationWrapper('remove_liquidity');
+
+    case 'withdraw':
+      return TranslationWrapper('withdraw');
+
+    case 'withdraw_reward':
+      return TranslationWrapper('withdraw');
+
+    default:
+      return TranslationWrapper('Swap');
+  }
 };
 
 export const checkAccountTip = () => {
@@ -222,6 +276,12 @@ export const parsedTransactionSuccessValue = (res: any) => {
   }
 };
 
+export const parsedLog = (log: string) => {
+  const buff = Buffer.from(log, 'base64');
+  const dataString = buff.toString('ascii');
+  return JSON.parse(dataString);
+};
+
 export const usnBuyAndSellToast = (txHash: string) => {
   toast(
     <a
@@ -279,8 +339,51 @@ export const getErrorMessage = (res: any) => {
   }
 };
 
+export const getMethodName = async (transaction: any, txHashes?: any) => {
+  const defaultName = transaction?.actions[0]?.['FunctionCall']?.method_name;
+
+  const onlyWithdraw = transaction?.actions?.every(
+    (a: any) => a?.['FunctionCall']?.method_name === 'withdraw'
+  );
+
+  const args = parsedLog(transaction?.actions[0]?.['FunctionCall']?.args);
+  const methodFromAccountPage = localStorage.getItem(
+    REF_FI_ACCOUNT_PAGE_WITHDRAW
+  );
+
+  // for xref stake
+  if (defaultName === 'ft_transfer_call' && args?.receiver_id === XREF_TOKEN_ID)
+    return 'stake';
+  else if (onlyWithdraw) {
+    // for remove liquidity
+
+    if (txHashes?.length > 1) {
+      const secondLastTx = txHashes[txHashes.length - 2];
+      const detail = (await checkTransaction(secondLastTx)) as any;
+
+      const implicitMethodName =
+        detail.transaction?.actions[0]?.['FunctionCall']?.method_name;
+
+      if (
+        implicitMethodName === 'remove_liquidity' ||
+        implicitMethodName === 'remove_liquidity_by_tokens'
+      ) {
+        return 'remove_liquidity';
+      } else return defaultName;
+    } else return defaultName;
+  } else if (methodFromAccountPage) {
+    // for near_withdraw and aurora withdraw
+    localStorage.removeItem(REF_FI_ACCOUNT_PAGE_WITHDRAW);
+    return 'withdraw';
+  } else return defaultName;
+};
+
 export const usePopUp = ({ globalState }: { globalState: any }) => {
-  const { txHash, pathname, signInErrorType, txHashes } = getURLInfo();
+  const { txHash, pathname, signInErrorType, txHashes, errorCode } =
+    getURLInfo();
+
+  if (errorCode) localStorage.removeItem(REF_FI_ACCOUNT_PAGE_WITHDRAW);
+
   const replaceHistoryState = () =>
     window.history.replaceState({}, '', window.location.origin + pathname);
 
@@ -299,11 +402,11 @@ export const usePopUp = ({ globalState }: { globalState: any }) => {
   useEffect(() => {
     if (txHash && isSignedIn && txHashes) {
       checkTransaction(txHash)
-        .then((res: any) => {
+        .then(async (res: any) => {
           const errorMsg = getErrorMessage(res);
           const transaction = res.transaction;
-          const methodName =
-            transaction?.actions[0]?.['FunctionCall']?.method_name;
+
+          const methodName = await getMethodName(transaction, txHashes);
 
           const isAurora = res?.transaction?.receiver_id === 'aurora';
 
@@ -316,19 +419,17 @@ export const usePopUp = ({ globalState }: { globalState: any }) => {
 
           return {
             isSwapPro,
-            isUSN: methodName == 'buy' || methodName == 'sell',
             errorMsg,
+            methodName,
           };
         })
-        .then(({ isUSN, errorMsg, isSwapPro }) => {
+        .then(({ errorMsg, isSwapPro, methodName }) => {
           if (isSwapPro) {
             checkCrossSwapTransactions(txHashes);
           } else if (errorMsg) {
             failToast(txHash);
-          } else if (isUSN) {
-            usnBuyAndSellToast(txHash);
           } else {
-            swapToast(txHash);
+            swapToast(txHash, methodNameParser(methodName));
           }
           replaceHistoryState();
         });

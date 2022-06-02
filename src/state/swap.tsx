@@ -404,20 +404,12 @@ export const useCrossSwap = ({
 
   const [avgFee, setAvgFee] = useState<number>(0);
 
-  const history = useHistory();
-
   const [count, setCount] = useState<number>(0);
   const refreshTime = Number(POOL_TOKEN_REFRESH_INTERVAL) * 1000;
-
-  const { pathname, txHashes } = getURLInfo();
 
   const minAmountOut = tokenOutAmount
     ? percentLess(slippageTolerance, tokenOutAmount)
     : null;
-
-  const { globalState } = useContext(WalletContext);
-
-  const isSignedIn = globalState.isSignedIn;
 
   const intl = useIntl();
 
@@ -441,23 +433,6 @@ export const useCrossSwap = ({
     }
     setAvgFee(avgFee);
   };
-
-  useEffect(() => {
-    if (txHashes && txHashes.length > 0 && isSignedIn) {
-      checkCrossSwapTransactions(txHashes).then(
-        (res: { status: boolean; hash: string; errorType?: string }) => {
-          const { status, hash, errorType } = res;
-
-          if (errorType || !status) {
-            failToast(hash, errorType);
-          } else {
-            swapToast(hash);
-          }
-        }
-      );
-      history.replace(pathname);
-    }
-  }, [txHashes]);
 
   const getEstimateCrossSwap = () => {
     setCanSwap(false);

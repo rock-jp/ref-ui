@@ -83,6 +83,10 @@ export const setCallbackUrl = (res: any) => {
     {
       [TRANSACTION_WALLET_TYPE.SENDER_WALLET]: parsedTransactionHashes,
       state: parsedTransactionHashes ? state : '',
+      errorCode:
+        res && res?.error === SENDER_ERROR.USER_REJECT.toString()
+          ? 'userRejected'
+          : '',
     }
   );
 

@@ -35,6 +35,8 @@ import {
 
 const specialToken = 'pixeltoken.near';
 
+export const REF_FI_ACCOUNT_PAGE_WITHDRAW = 'REF_FI_ACCOUNT_PAGE_WITHDRAW';
+
 export const checkTokenNeedsStorageDeposit = async () => {
   let storageNeeded: math.MathType = 0;
 
@@ -395,6 +397,8 @@ export const batchWithdraw = async (tokenMap: any) => {
   if (wNEARAction) {
     transactions.push(wNEARAction);
   }
+  localStorage.setItem(REF_FI_ACCOUNT_PAGE_WITHDRAW, 'from_account_page');
+
   return executeMultipleTransactions(transactions);
 };
 
