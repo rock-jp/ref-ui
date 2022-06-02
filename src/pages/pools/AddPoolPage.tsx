@@ -18,7 +18,10 @@ import BigNumber from 'bignumber.js';
 import QuestionMark from '~components/farm/QuestionMark';
 import ReactTooltip from 'react-tooltip';
 import { getCurrentWallet, WalletContext } from '../../utils/sender-wallet';
-import { getURLInfo } from '../../components/layout/transactionTipPopUp';
+import {
+  getURLInfo,
+  parsedTransactionSuccessValue,
+} from '../../components/layout/transactionTipPopUp';
 import { checkTransactionStatus } from '../../services/swap';
 import { decodeBase64 } from 'lzutf8';
 import { useHistory } from 'react-router-dom';
@@ -50,13 +53,9 @@ export function AddPoolPage() {
   useEffect(() => {
     if (txHash && getCurrentWallet().wallet.isSignedIn()) {
       checkTransactionStatus(txHash).then((res) => {
-        const status: any = res.status;
-        const data: string | undefined = status.SuccessValue;
-        if (data) {
-          const buff = Buffer.from(data, 'base64');
-          const pool_id = buff.toString('ascii');
-          history.push(`/pool/${pool_id}`);
-        }
+        const pool_id = parsedTransactionSuccessValue(res);
+
+        if (pool_id) history.push(`/pool/${pool_id}`);
       });
     }
   }, [txHash]);

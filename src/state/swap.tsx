@@ -101,8 +101,6 @@ export const useSwap = ({
   const history = useHistory();
   const [count, setCount] = useState<number>(0);
 
-  const { txHash, pathname, errorType } = getURLInfo();
-
   const minAmountOut = tokenOutAmount
     ? percentLess(slippageTolerance, tokenOutAmount)
     : null;
@@ -130,32 +128,6 @@ export const useSwap = ({
     }
     setAvgFee(avgFee);
   };
-
-  useEffect(() => {
-    if (txHash && getCurrentWallet().wallet.isSignedIn()) {
-      checkTransaction(txHash)
-        .then((res: any) => {
-          const transactionErrorType = getErrorMessage(res);
-          const transaction = res.transaction;
-          return {
-            isSwap:
-              transaction?.actions[1]?.['FunctionCall']?.method_name ===
-                'ft_transfer_call' ||
-              transaction?.actions[0]?.['FunctionCall']?.method_name ===
-                'ft_transfer_call' ||
-              transaction?.actions[0]?.['FunctionCall']?.method_name === 'swap',
-            transactionErrorType,
-          };
-        })
-        .then(({ isSwap, transactionErrorType }) => {
-          if (isSwap) {
-            !transactionErrorType && !errorType && swapToast(txHash);
-            transactionErrorType && failToast(txHash, transactionErrorType);
-          }
-          history.replace(pathname);
-        });
-    }
-  }, [txHash]);
 
   const getEstimate = () => {
     setCanSwap(false);
@@ -290,7 +262,7 @@ export const useStableSwap = ({
   const [tokenInAmountMemo, setTokenInAmountMemo] = useState<string>('');
   const history = useHistory();
 
-  const { txHash, pathname, errorType } = getURLInfo();
+  const { txHash, pathname } = getURLInfo();
 
   const minAmountOut = tokenOutAmount
     ? percentLess(slippageTolerance, tokenOutAmount)
@@ -367,7 +339,7 @@ export const useStableSwap = ({
         })
         .then(({ isSwap, isSlippageError }) => {
           if (isSwap) {
-            !isSlippageError && !errorType && swapToast(txHash);
+            !isSlippageError && swapToast(txHash);
             isSlippageError && failToast(txHash, 'Slippage Violation');
           }
           history.replace(pathname);
@@ -437,7 +409,7 @@ export const useCrossSwap = ({
   const [count, setCount] = useState<number>(0);
   const refreshTime = Number(POOL_TOKEN_REFRESH_INTERVAL) * 1000;
 
-  const { txHash, pathname, errorType, txHashes } = getURLInfo();
+  const { pathname, txHashes } = getURLInfo();
 
   const minAmountOut = tokenOutAmount
     ? percentLess(slippageTolerance, tokenOutAmount)

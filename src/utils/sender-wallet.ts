@@ -13,6 +13,7 @@ import {
 
 import { getAmount, RefFiFunctionCallOptions, getGas } from '../services/near';
 import { scientificNotationToString } from './numbers';
+import { getURLInfo } from '../components/layout/transactionTipPopUp';
 import {
   TRANSACTION_WALLET_TYPE,
   TRANSACTION_STATE,
@@ -73,8 +74,6 @@ export const setCallbackUrl = (res: any) => {
     ? TRANSACTION_STATE.SUCCESS
     : TRANSACTION_STATE.FAIL;
 
-  const errorType =
-    state === TRANSACTION_STATE.FAIL ? res?.response?.error?.type : '';
   const transactionHashes = getTransactionHashes(res, state);
 
   const parsedTransactionHashes = transactionHashes?.join(',');
@@ -84,7 +83,6 @@ export const setCallbackUrl = (res: any) => {
     {
       [TRANSACTION_WALLET_TYPE.SENDER_WALLET]: parsedTransactionHashes,
       state: parsedTransactionHashes ? state : '',
-      errorType,
     }
   );
 
@@ -273,4 +271,62 @@ export const globalStateReducer = (
         isSignedIn: false,
       };
   }
+};
+
+export const useSenderWallet = ({
+  globalStatedispatch,
+}: {
+  globalStatedispatch: any;
+}) => {
+  const { signInErrorType } = getURLInfo();
+
+  useEffect(() => {
+    if (webWallet.isSignedIn()) {
+      globalStatedispatch({ type: 'signIn' });
+    }
+  }, [webWallet.isSignedIn()]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (window.near) {
+        window.near.on('signIn', (res: any) => {
+          if (
+            getCurrentWallet().wallet_type === 'near-wallet' &&
+            webWallet.isSignedIn()
+          )
+            return;
+          saveSenderLoginRes();
+          globalStatedispatch({ type: 'signIn' });
+        });
+        window.near.on('accountChanged', (changedAccountId: string) => {
+          if (
+            getCurrentWallet().wallet_type === 'near-wallet' &&
+            webWallet.isSignedIn()
+          )
+            return;
+          saveSenderLoginRes(changedAccountId);
+          window.location.reload();
+        });
+        window.near.on('signOut', () => {
+          if (getCurrentWallet().wallet_type === 'sender-wallet') {
+            removeSenderLoginRes();
+            globalStatedispatch({ type: 'signOut' });
+          }
+        });
+      }
+
+      if (
+        window.near &&
+        getSenderLoginRes() &&
+        getCurrentWallet().wallet_type === 'sender-wallet' &&
+        !signInErrorType
+      ) {
+        getSenderWallet(window)
+          .requestSignIn(REF_FARM_CONTRACT_ID)
+          .then((res: any) => {
+            !res?.error && saveSenderLoginRes();
+          });
+      }
+    }, 300);
+  }, [window, window?.near]);
 };

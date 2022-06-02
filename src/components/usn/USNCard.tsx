@@ -247,7 +247,6 @@ export default function USNCard(props: {
   const [loadingTrigger, setLoadingTrigger] = useState<boolean>(true);
   const [loadingPause, setLoadingPause] = useState<boolean>(false);
   const [showBuyLoading, setShowBuyLoading] = useState<boolean>(false);
-  const { txHash, pathname, errorType } = getURLInfo();
   const intl = useIntl();
   const history = useHistory();
 

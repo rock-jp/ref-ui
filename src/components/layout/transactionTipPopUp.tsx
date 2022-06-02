@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import getConfig from '../../services/config';
 import { FormattedMessage } from 'react-intl';
@@ -6,6 +6,9 @@ import { CloseIcon } from '../icon/Actions';
 import { isMobile } from '../../utils/device';
 import { checkTransaction } from '../../services/swap';
 import { getCurrentWallet } from '~utils/sender-wallet';
+import { senderSignedInToast } from './senderSignInPopUp';
+import { removeSenderLoginRes } from '../../utils/sender-wallet';
+import { useHistory } from 'react-router-dom';
 
 export enum TRANSACTION_WALLET_TYPE {
   NEAR_WALLET = 'transactionHashes',
@@ -32,8 +35,6 @@ export const getURLInfo = () => {
 
   const pathname = window.location.pathname;
 
-  const errorType = new URLSearchParams(search).get('errorType');
-
   const errorCode = new URLSearchParams(search).get('errorCode');
 
   const signInErrorType = new URLSearchParams(search).get('signInErrorType');
@@ -47,14 +48,13 @@ export const getURLInfo = () => {
     txHash:
       txHashes && txHashes.length > 0 ? txHashes[txHashes.length - 1] : '',
     pathname,
-    errorType,
     signInErrorType,
     errorCode,
     txHashes,
   };
 };
 
-export const swapToast = (txHash: string) => {
+export const swapToast = (txHash: string, tip?: JSX.Element | string) => {
   toast(
     <a
       className="text-white w-full h-full pl-1.5"
@@ -166,90 +166,45 @@ export const checkCrossSwapTransactions = async (txHashes: string[]) => {
   const lastTx = txHashes.pop();
   const txDetail: any = await checkTransaction(lastTx);
 
-  if (txHashes.length > 0) {
-    // judge if aurora call
-    const isAurora = txDetail.transaction?.receiver_id === 'aurora';
+  const parsedOut = parsedTransactionSuccessValue(txDetail);
 
-    const ifCall =
-      txDetail.transaction?.actions?.length === 1 &&
-      txDetail.transaction?.actions?.[0]?.FunctionCall?.method_name === 'call';
+  const erc20FailPattern = /burn amount exceeds balance/i;
 
-    if (isAurora && ifCall) {
-      const parsedOut = parsedTransactionSuccessValue(txDetail);
-
-      const erc20FailPattern = /burn amount exceeds balance/i;
-
-      if (
-        erc20FailPattern.test(parsedOut) ||
-        (parsedOut.toString().trim().length === 14 &&
-          parsedOut.toString().trim().indexOf('|R') !== -1)
-      ) {
-        return {
-          hash: lastTx,
-          status: false,
-          errorType: 'Withdraw Failed',
-        };
-      } else {
-        const secondLastHash = txHashes.pop();
-        const secondDetail = await checkTransaction(secondLastHash);
-
-        const slippageErrprReg = /INSUFFICIENT_OUTPUT_AMOUNT/i;
-        const expiredErrorReg = /EXPIRED/i;
-
-        const parsedOutput = parsedTransactionSuccessValue(secondDetail);
-
-        if (slippageErrprReg.test(parsedOutput)) {
-          return {
-            hash: secondLastHash,
-            status: false,
-            errorType: 'Slippage Violation',
-          };
-        } else if (expiredErrorReg.test(parsedOutput)) {
-          return {
-            hash: secondLastHash,
-            status: false,
-            errorType: 'Expired',
-          };
-        } else {
-          return {
-            hash: lastTx,
-            status: true,
-          };
-        }
-      }
-    } else {
-      // normal swap judgement
-
-      const errorMessasge = getErrorMessage(txDetail);
-
-      if (errorMessasge)
-        return {
-          status: false,
-          hash: lastTx,
-          errorType: errorMessasge,
-        };
-      else {
-        return {
-          status: true,
-          hash: lastTx,
-        };
-      }
-    }
-
-    // validate if last tx is success
+  if (
+    erc20FailPattern.test(parsedOut) ||
+    (parsedOut.toString().trim().length === 14 &&
+      parsedOut.toString().trim().indexOf('|R') !== -1)
+  ) {
+    return {
+      hash: lastTx,
+      status: false,
+      errorType: 'Withdraw Failed',
+    };
   } else {
-    const errorMessasge = getErrorMessage(txDetail);
+    const secondLastHash = txHashes.pop();
+    const secondDetail = await checkTransaction(secondLastHash);
 
-    if (errorMessasge)
+    const slippageErrprReg = /INSUFFICIENT_OUTPUT_AMOUNT/i;
+    const expiredErrorReg = /EXPIRED/i;
+
+    const parsedOutput = parsedTransactionSuccessValue(secondDetail);
+
+    if (slippageErrprReg.test(parsedOutput)) {
       return {
+        hash: secondLastHash,
         status: false,
-        hash: lastTx,
-        errorType: errorMessasge,
+        errorType: 'Slippage Violation',
       };
-    else {
+    } else if (expiredErrorReg.test(parsedOutput)) {
       return {
-        status: true,
+        hash: secondLastHash,
+        status: false,
+        errorType: 'Expired',
+      };
+    } else {
+      return {
         hash: lastTx,
+        status: true,
       };
     }
   }
@@ -266,6 +221,7 @@ export const parsedTransactionSuccessValue = (res: any) => {
     return parsedData;
   }
 };
+
 export const usnBuyAndSellToast = (txHash: string) => {
   toast(
     <a
@@ -321,4 +277,61 @@ export const getErrorMessage = (res: any) => {
   } else {
     return null;
   }
+};
+
+export const usePopUp = ({ globalState }: { globalState: any }) => {
+  const { txHash, pathname, signInErrorType, txHashes } = getURLInfo();
+  const replaceHistoryState = () =>
+    window.history.replaceState({}, '', window.location.origin + pathname);
+
+  const isSignedIn = globalState.isSignedIn;
+
+  // sender signInError
+  useEffect(() => {
+    if (signInErrorType) {
+      senderSignedInToast(signInErrorType);
+      removeSenderLoginRes();
+      replaceHistoryState();
+    }
+  }, [signInErrorType]);
+
+  // general toast
+  useEffect(() => {
+    if (txHash && isSignedIn && txHashes) {
+      checkTransaction(txHash)
+        .then((res: any) => {
+          const errorMsg = getErrorMessage(res);
+          const transaction = res.transaction;
+          const methodName =
+            transaction?.actions[0]?.['FunctionCall']?.method_name;
+
+          const isAurora = res?.transaction?.receiver_id === 'aurora';
+
+          const ifCall =
+            res?.transaction?.actions?.length === 1 &&
+            res?.transaction?.actions?.[0]?.FunctionCall?.method_name ===
+              'call';
+
+          const isSwapPro = txHashes?.length > 1 && isAurora && ifCall;
+
+          return {
+            isSwapPro,
+            isUSN: methodName == 'buy' || methodName == 'sell',
+            errorMsg,
+          };
+        })
+        .then(({ isUSN, errorMsg, isSwapPro }) => {
+          if (isSwapPro) {
+            checkCrossSwapTransactions(txHashes);
+          } else if (errorMsg) {
+            failToast(txHash);
+          } else if (isUSN) {
+            usnBuyAndSellToast(txHash);
+          } else {
+            swapToast(txHash);
+          }
+          replaceHistoryState();
+        });
+    }
+  }, [txHash, isSignedIn, txHashes]);
 };

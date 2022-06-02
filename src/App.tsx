@@ -82,8 +82,9 @@ import {
 } from './utils/sender-wallet';
 import StableSwapPageUSN from '~pages/stable/StableSwapPageUSN';
 import { checkTransaction } from './services/swap';
-import { swapToast } from './components/layout/transactionTipPopUp';
+import { swapToast, usePopUp } from './components/layout/transactionTipPopUp';
 import { StableSwapRouter } from './pages/stable/StableSwapRouter';
+import { useSenderWallet } from './utils/sender-wallet';
 
 Modal.defaultStyles = {
   overlay: {
@@ -115,114 +116,9 @@ function App() {
 
   const [globalState, globalStatedispatch] = GlobalStateReducer;
 
-  const { txHash, pathname, errorType, signInErrorType } = getURLInfo();
+  usePopUp({ globalState });
 
-  useEffect(() => {
-    if (errorType) {
-      failToast(txHash, errorType);
-
-      // failing toast only once
-      window.history.replaceState({}, '', window.location.origin + pathname);
-    }
-    if (signInErrorType) {
-      senderSignedInToast(signInErrorType);
-      removeSenderLoginRes();
-      window.history.replaceState({}, '', window.location.origin + pathname);
-    }
-  }, [errorType, signInErrorType]);
-  // for usn start
-  const isSignedIn = globalState.isSignedIn;
-  useEffect(() => {
-    if (txHash && isSignedIn) {
-      checkTransaction(txHash)
-        .then((res: any) => {
-          const slippageErrorPattern = /ERR_MIN_AMOUNT|slippage error/i;
-
-          const isSlippageError = res.receipts_outcome.some((outcome: any) => {
-            return slippageErrorPattern.test(
-              outcome?.outcome?.status?.Failure?.ActionError?.kind
-                ?.FunctionCallError?.ExecutionError
-            );
-          });
-          const transaction = res.transaction;
-          const methodName =
-            transaction?.actions[0]?.['FunctionCall']?.method_name;
-          return {
-            isUSN: methodName == 'buy' || methodName == 'sell',
-            isSlippageError,
-            isNearWithdraw: methodName == 'near_withdraw',
-            isNearDeposit: methodName == 'near_deposit',
-          };
-        })
-        .then(({ isUSN, isSlippageError, isNearWithdraw, isNearDeposit }) => {
-          if (isUSN || isNearWithdraw || isNearDeposit) {
-            isUSN &&
-              !isSlippageError &&
-              !errorType &&
-              usnBuyAndSellToast(txHash);
-            (isNearWithdraw || isNearDeposit) &&
-              !errorType &&
-              swapToast(txHash);
-            window.history.replaceState(
-              {},
-              '',
-              window.location.origin + pathname
-            );
-          }
-        });
-    }
-  }, [txHash, isSignedIn]);
-  // for usn end
-
-  useEffect(() => {
-    if (webWallet.isSignedIn()) {
-      globalStatedispatch({ type: 'signIn' });
-    }
-  }, [webWallet.isSignedIn()]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (window.near) {
-        window.near.on('signIn', (res: any) => {
-          if (
-            getCurrentWallet().wallet_type === 'near-wallet' &&
-            webWallet.isSignedIn()
-          )
-            return;
-          saveSenderLoginRes();
-          globalStatedispatch({ type: 'signIn' });
-        });
-        window.near.on('accountChanged', (changedAccountId: string) => {
-          if (
-            getCurrentWallet().wallet_type === 'near-wallet' &&
-            webWallet.isSignedIn()
-          )
-            return;
-          saveSenderLoginRes(changedAccountId);
-          window.location.reload();
-        });
-        window.near.on('signOut', () => {
-          if (getCurrentWallet().wallet_type === 'sender-wallet') {
-            removeSenderLoginRes();
-            globalStatedispatch({ type: 'signOut' });
-          }
-        });
-      }
-
-      if (
-        window.near &&
-        getSenderLoginRes() &&
-        getCurrentWallet().wallet_type === 'sender-wallet' &&
-        !signInErrorType
-      ) {
-        getSenderWallet(window)
-          .requestSignIn(REF_FARM_CONTRACT_ID)
-          .then((res: any) => {
-            !res?.error && saveSenderLoginRes();
-          });
-      }
-    }, 300);
-  }, [window, window?.near]);
+  useSenderWallet({ globalStatedispatch });
 
   return (
     <WalletContext.Provider value={{ globalState, globalStatedispatch }}>
