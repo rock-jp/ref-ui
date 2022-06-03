@@ -31,7 +31,12 @@ import {
 } from '../utils/numbers';
 import BigNumber from 'bignumber.js';
 import OldInputAmount from '../components/forms/OldInputAmount';
-import { deposit, withdraw, batchWithdraw } from '../services/token';
+import {
+  deposit,
+  withdraw,
+  batchWithdraw,
+  REF_FI_ACCOUNT_PAGE_WITHDRAW,
+} from '../services/token';
 import { nearMetadata, wrapNear } from '../services/wrap-near';
 import { BeatLoading } from '../components/layout/Loading';
 import { STORAGE_PER_TOKEN } from '../services/creators/storage';
@@ -407,6 +412,8 @@ function AccountTable(props: any) {
   }
   function doWithDraw() {
     setWithdrawLoading(true);
+    localStorage.setItem(REF_FI_ACCOUNT_PAGE_WITHDRAW, 'from_account_page');
+
     if (showCrossBalance) batchWithdrawFromAurora(checkedAuroraMap);
     else batchWithdraw(checkedMap);
   }

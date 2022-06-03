@@ -397,7 +397,6 @@ export const batchWithdraw = async (tokenMap: any) => {
   if (wNEARAction) {
     transactions.push(wNEARAction);
   }
-  localStorage.setItem(REF_FI_ACCOUNT_PAGE_WITHDRAW, 'from_account_page');
 
   return executeMultipleTransactions(transactions);
 };
