@@ -537,5 +537,13 @@ const zh_CN = {
   stake_min_deposit: '输入的值必须大于或等于 ',
   borrow: '借',
   burrow_usn_tip: '你可以通过Burrow来借USN.',
+  swap_successfull: '交易成功',
+  withdraw_successfull: '提取成功',
+  remove_liquidity_successfull: '移除流动性成功',
+  add_liquidity_successfull: '添加流动性成功',
+  trading_successfull: '交易成功',
+  stake_successfull: '质押成功',
+  unstake_successfull: '取消质押成功',
+  create_pool_successfull: '创建流动池成功',
 };
 export default Object.assign(zh_CN, zh_CN_in_risks_page);

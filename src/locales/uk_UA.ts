@@ -553,5 +553,13 @@ const uk_UA = {
   borrow: 'Позичати',
   burrow_usn_tip: 'Ви можете позичити USN на Burrow.',
   stake_min_deposit: 'Input must be greater than or equal to ',
+  swap_successfull: 'Обмін успішно',
+  withdraw_successfull: 'Виведення успішно',
+  remove_liquidity_successfull: 'Видалити ліквідність успішно',
+  add_liquidity_successfull: 'Додати ліквідність успішно',
+  trading_successfull: 'Торгівля успішна',
+  stake_successfull: 'Ставка вдала',
+  unstake_successfull: 'Unstake успішно',
+  create_pool_successfull: 'Створити пул успішно',
 };
 export default Object.assign(uk_UA, uk_UA_in_risks_page);

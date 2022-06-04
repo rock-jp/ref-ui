@@ -568,5 +568,13 @@ const en_US = {
   stake_min_deposit: 'Input must be greater than or equal to ',
   borrow: 'Borrow',
   burrow_usn_tip: 'You can borrow USN on Burrow.',
+  swap_successfull: 'Swap successful',
+  withdraw_successfull: 'Withdraw successful',
+  remove_liquidity_successfull: 'Remove liquidity successful',
+  add_liquidity_successfull: 'Add liquidity successful',
+  trading_successfull: 'Trading successful',
+  stake_successfull: 'Stake successful',
+  unstake_successfull: 'Unstake successful',
+  create_pool_successfull: 'Create pool successful',
 };
 export default Object.assign(en_US, en_US_in_risks_page);

@@ -568,5 +568,13 @@ const ko = {
   burrow_usn_tip: 'Burrow에서 USN을 빌릴 수 있습니다.',
   borrow: '빌리다',
   stake_min_deposit: 'Input must be greater than or equal to ',
+  swap_successfull: '스왑 성공',
+  withdraw_successfull: '출금 성공',
+  remove_liquidity_successfull: '유동성 제거 성공',
+  add_liquidity_successfull: '유동성 추가 성공',
+  trading_successfull: '거래 성공',
+  stake_successfull: '스테이크 성공',
+  unstake_successfull: '언스테이킹 성공',
+  create_pool_successfull: '풀 생성 성공',
 };
 export default Object.assign(ko, ko_in_risks_page);

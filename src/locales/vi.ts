@@ -576,5 +576,13 @@ const vi = {
   borrow: 'Vay',
   burrow_usn_tip: 'Bạn có thể mượn USN trên Burrow.',
   stake_min_deposit: 'Input must be greater than or equal to ',
+  swap_successfull: 'Hoán đổi thành công',
+  withdraw_successfull: 'Rút tiền thành công',
+  remove_liquidity_successfull: 'Xóa thanh khoản thành công',
+  add_liquidity_successfull: 'Thêm thanh khoản thành công',
+  trading_successfull: 'Giao dịch thành công',
+  stake_successfull: 'Cổ phần thành công',
+  unstake_successfull: 'Không thành công',
+  create_pool_successfull: 'Tạo nhóm thành công',
 };
 export default Object.assign(vi, vi_in_risks_page);

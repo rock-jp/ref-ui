@@ -67,8 +67,6 @@ export const swapToast = (txHash: string, tip?: JSX.Element | string) => {
       }}
     >
       {tip}
-      &nbsp;
-      <FormattedMessage id="successful" defaultMessage="successful" />
       .&nbsp;
       <FormattedMessage id="click_to_view" defaultMessage="Click to view" />
     </a>,
@@ -136,47 +134,50 @@ export const TranslationWrapper = (text: string) => (
 export const methodNameParser = (parsedMethodName: string) => {
   switch (parsedMethodName) {
     case 'add_simple_pool':
-      return TranslationWrapper('create_pool');
+      return TranslationWrapper('create_pool_successfull');
 
     // unstake on farms page
     case 'withdraw_seed':
-      return TranslationWrapper('unstake');
+      return TranslationWrapper('unstake_successfull');
 
     // unstake xref
     case 'unstake':
-      return TranslationWrapper('unstake');
+      return TranslationWrapper('unstake_successfull');
 
     // farm stake
     case 'mft_transfer_call':
-      return TranslationWrapper('stake');
+      return TranslationWrapper('stake_successfull');
 
     // stake xref
     case 'stake':
-      return TranslationWrapper('stake');
+      return TranslationWrapper('stake_successfull');
 
     case 'buy':
-      return TranslationWrapper('trading');
+      return TranslationWrapper('trading_successfull');
 
     case 'sell':
-      return TranslationWrapper('trading');
+      return TranslationWrapper('trading_successfull');
 
     case 'add_stable_liquidity':
-      return TranslationWrapper('add_liquidity');
+      return TranslationWrapper('add_liquidity_successfull');
 
     case 'add_liquidity':
-      return TranslationWrapper('add_liquidity');
+      return TranslationWrapper('add_liquidity_successfull');
+
+    case 'remove_liquidity_by_tokens':
+      return TranslationWrapper('remove_liquidity_successfull');
 
     case 'remove_liquidity':
-      return TranslationWrapper('remove_liquidity');
+      return TranslationWrapper('remove_liquidity_successfull');
 
     case 'withdraw':
-      return TranslationWrapper('withdraw');
+      return TranslationWrapper('withdraw_successfull');
 
     case 'withdraw_reward':
-      return TranslationWrapper('withdraw');
+      return TranslationWrapper('withdraw_successfull');
 
     default:
-      return TranslationWrapper('Swap');
+      return TranslationWrapper('swap_successfull');
   }
 };
 

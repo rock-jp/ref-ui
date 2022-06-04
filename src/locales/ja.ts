@@ -578,5 +578,13 @@ const ja = {
   stake_min_deposit: 'Input must be greater than or equal to ',
   borrow: '借りる',
   burrow_usn_tip: 'あなたはBurrowでUSNを借りることができます。',
+  swap_successfull: 'スワップ成功',
+  withdraw_successfull: '成功した撤退',
+  remove_liquidity_successfull: '流動性の除去に成功',
+  add_liquidity_successfull: '流動性の追加に成功',
+  trading_successfull: '取引成功',
+  stake_successfull: 'ステーク成功',
+  unstake_successfull: 'アンステーク成功',
+  create_pool_successfull: 'プールの作成に成功',
 };
 export default Object.assign(ja, ja_in_risks_page);

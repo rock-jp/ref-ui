@@ -567,5 +567,13 @@ const ru = {
   burrow_usn_tip: 'Вы можете одолжить USN на Burrow.',
   borrow: 'Занимать',
   stake_min_deposit: 'Input must be greater than or equal to ',
+  swap_successfull: 'Обмен успешно',
+  withdraw_successfull: 'Вывод успешно',
+  remove_liquidity_successfull: 'Удаление ликвидности успешно',
+  add_liquidity_successfull: 'Добавить ликвидность успешно',
+  trading_successfull: 'Торговля успешна',
+  stake_successfull: 'Ставка успешна',
+  unstake_successfull: 'Анстейк успешен',
+  create_pool_successfull: 'Создать пул успешно',
 };
 export default Object.assign(ru, ru_in_risks_page);
